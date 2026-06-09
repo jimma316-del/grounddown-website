@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 90" fill="none">
+  <!-- Ground screw icon mark -->
+  <g stroke="#6B7FAA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="44,6 64,22 84,6"/>
+    <polyline points="34,19 64,38 94,19"/>
+    <polyline points="24,32 64,54 104,32"/>
+    <polyline points="14,45 64,70 114,45"/>
+  </g>
+  <!-- Ground waves -->
+  <path d="M14,78 Q39,69 64,78 Q89,87 114,78" stroke="#6B7FAA" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M14,89 Q39,80 64,89 Q89,98 114,89" stroke="#6B7FAA" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Blue banner -->
+  <rect x="108" y="55" width="452" height="35" fill="#6B7FAA"/>
+  <!-- Text -->
+  <text x="284" y="78.5" text-anchor="middle" fill="white" font-family="'Barlow Condensed', 'DM Sans', sans-serif" font-size="17" font-weight="400" letter-spacing="5">GROUND SCREW FOUNDATIONS</text>
+</svg>
