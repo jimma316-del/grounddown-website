@@ -16,7 +16,19 @@ document.querySelectorAll('.mobile-nav-link').forEach(link => {
   });
 });
 
-// Desktop dropdown: click also toggles open (hover handled by CSS)
+// Desktop dropdown: hover opens, with a leave-delay so cursor can travel to mega menu
+const leaveTimers = new Map();
+document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
+  dropdown.addEventListener('mouseenter', () => {
+    clearTimeout(leaveTimers.get(dropdown));
+    document.querySelectorAll('.nav-dropdown').forEach(d => { if (d !== dropdown) d.classList.remove('open'); });
+    dropdown.classList.add('open');
+  });
+  dropdown.addEventListener('mouseleave', () => {
+    leaveTimers.set(dropdown, setTimeout(() => dropdown.classList.remove('open'), 300));
+  });
+});
+// Click toggle still works too
 document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
   toggle.addEventListener('click', e => {
     e.stopPropagation();

@@ -284,16 +284,11 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   box-shadow: 0 16px 48px rgba(0,0,0,.65);
   visibility: hidden;
   opacity: 0;
-  pointer-events: none;
   transition: opacity 0.15s ease, visibility 0.15s ease;
-  transition-delay: 0.12s;
 }
-.nav-dropdown:hover .nav-mega-menu,
 .nav-dropdown.open .nav-mega-menu {
   visibility: visible;
   opacity: 1;
-  pointer-events: auto;
-  transition-delay: 0s;
 }
 .nav-mega-tiles {
   display: flex;
