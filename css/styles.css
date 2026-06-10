@@ -271,7 +271,6 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
 .nav-dropdown:hover .nav-chevron,
 .nav-dropdown.open .nav-chevron { transform: rotate(180deg); }
 .nav-mega-menu {
-  display: none;
   position: absolute;
   top: 76px;
   left: 0;
@@ -283,9 +282,19 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   padding: 1.25rem 2rem 1.5rem;
   z-index: 10;
   box-shadow: 0 16px 48px rgba(0,0,0,.65);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition-delay: 0.12s;
 }
 .nav-dropdown:hover .nav-mega-menu,
-.nav-dropdown.open .nav-mega-menu { display: block; }
+.nav-dropdown.open .nav-mega-menu {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
 .nav-mega-tiles {
   display: flex;
   gap: .75rem;
