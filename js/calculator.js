@@ -57,10 +57,11 @@ const MILEAGE = [
 ]
 
 const BASE_CONFIGS = {
-  sips:  { label:'SIPs Base',   widthSpacing:1.22, depthSpacing:1.5 },
-  '4x2': { label:'4"×2" Base', widthSpacing:1.2,  depthSpacing:1.2 },
-  '5x2': { label:'5"×2" Base', widthSpacing:1.5,  depthSpacing:1.5 },
-  '6x2': { label:'6"×2" Base', widthSpacing:1.8,  depthSpacing:1.8 },
+  sips:   { label:'SIPs Base',             widthSpacing:1.22, depthSpacing:1.5 },
+  '4x2':  { label:'4"×2" Base',           widthSpacing:1.2,  depthSpacing:1.2 },
+  '5x2':  { label:'5"×2" Base',           widthSpacing:1.5,  depthSpacing:1.5 },
+  '6x2':  { label:'6"×2" Base',           widthSpacing:1.8,  depthSpacing:1.8 },
+  unsure: { label:'Standard (1.2m × 1.2m)', widthSpacing:1.2, depthSpacing:1.2 },
 }
 
 const INSET  = 0.1
@@ -418,8 +419,15 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
       ${notices.length ? `<div class="result-notices">${noticesHtml}</div>` : ''}
 
       <p class="result-disclaimer">${disclaimer}</p>
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:.75rem;">
+        <svg style="width:20px;height:20px;color:#16a34a;flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <div>
+          <p style="font-weight:700;color:#15803d;margin:0 0 .25rem;">We've received your details</p>
+          <p style="color:#166534;font-size:.85rem;margin:0;">We'll be in touch within 1 working day to confirm your quote. Check your email or phone — we'll usually be quicker than that.</p>
+        </div>
+      </div>
       <div class="result-actions">
-        <a href="contact.html" class="btn btn-primary btn-lg">Request a Formal Quote</a>
+        <a href="tel:07840092397" class="btn btn-primary btn-lg">Call Us Now</a>
         <button onclick="resetCalc()" class="btn btn-dark">Recalculate</button>
       </div>
     </div>
