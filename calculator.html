@@ -10,11 +10,9 @@
   <link rel="stylesheet" href="css/styles.css" />
   <style>
     /* ---- Calculator-specific styles ---- */
-    .calc-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: start;
+    .calc-form-wrap {
+      max-width: 900px;
+      margin: 0 auto;
     }
     .calc-card {
       background: white;
@@ -409,11 +407,50 @@
     .screw-card--featured.active .screw-card-list li { color: rgba(255,255,255,.65); }
     .screw-card--featured.active .screw-card-list li::before { color: #7ab4f5; }
 
+    /* ---- Customer type toggle ---- */
+    .customer-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    .customer-btn {
+      padding: 1.1rem 1.5rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--grey-200);
+      background: white;
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .customer-btn:hover { border-color: var(--green-500); }
+    .customer-btn.active {
+      border-color: var(--green-500);
+      background: rgba(34,80,150,.05);
+    }
+    .customer-btn-title {
+      font-size: var(--fs-base);
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: .2rem;
+    }
+    .customer-btn.active .customer-btn-title { color: var(--green-700); }
+    .customer-btn-sub {
+      font-size: var(--fs-sm);
+      color: var(--grey-500);
+    }
+    /* ---- Result section ---- */
+    .price-box-note-ex { font-size: .75rem; color: var(--grey-500); margin-top: .15rem; }
+    .result-actions {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 1.5rem 1.5rem;
+    }
+    .result-actions .btn { flex: 1; justify-content: center; }
     @media (max-width: 900px) {
-      .calc-layout { grid-template-columns: 1fr; }
-      .calc-result-sticky { position: static; }
       .base-grid { grid-template-columns: repeat(2, 1fr); }
       .screw-grid { grid-template-columns: repeat(2, 1fr); }
+      .customer-type-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 600px) {
       .calc-card { padding: 1.25rem; }
@@ -421,6 +458,9 @@
       .result-grid { grid-template-columns: 1fr; }
       .price-box--supply { border-right: none; border-bottom: 1px solid var(--grey-100); }
       .result-header { flex-direction: column; }
+      .result-actions { flex-direction: column; }
+      .screw-grid { grid-template-columns: repeat(2, 1fr); }
+      .customer-type-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -519,7 +559,7 @@
     <div class="page-hero-inner">
       <span class="eyebrow">Instant Estimate</span>
       <h1>Ground Screw Price Calculator</h1>
-      <p>Enter your garden room dimensions and base type for an immediate price guide. Domestic/residential rates inc VAT.</p>
+      <p>Get an instant estimate for domestic and trade projects. Formal quote confirmed within 1 working day.</p>
     </div>
   </div>
 </section>
@@ -527,9 +567,9 @@
 <div class="trust-strip">
   <div class="container">
     <div class="trust-items">
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Domestic / residential pricing</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Domestic &amp; trade pricing</div>
       <div class="trust-div"></div>
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Standard 1.25m screws</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>All screw lengths covered</div>
       <div class="trust-div"></div>
       <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Formal quote within 1 working day</div>
       <div class="trust-div"></div>
@@ -541,21 +581,46 @@
 <section class="section">
   <div class="container">
 
-    <div class="calc-layout">
+    <!-- Form section -->
+    <div id="calc-form-section">
+      <div class="calc-form-wrap">
 
-      <!-- LEFT: Calculator inputs -->
-      <div>
-
-        <!-- Trade switcher -->
-        <div class="trade-banner">
-          <span>Trade buyer?</span>
-          <a href="calculator-trade.html">Click here for trade pricing &rarr;</a>
+        <!-- Step 1: Trade or domestic? -->
+        <div class="calc-card">
+          <h3>1. Are you a trade buyer?</h3>
+          <p>Trade pricing shows both ex and inc VAT. Domestic pricing is shown inc VAT.</p>
+          <div class="customer-type-grid">
+            <button class="customer-btn active" data-customer="domestic">
+              <div class="customer-btn-title">Domestic / Residential</div>
+              <div class="customer-btn-sub">Private homeowners</div>
+            </button>
+            <button class="customer-btn" data-customer="trade">
+              <div class="customer-btn-title">Trade</div>
+              <div class="customer-btn-sub">Builders, garden room companies</div>
+            </button>
+          </div>
         </div>
 
-        <!-- Step 1: Screw length -->
+        <!-- Step 2: Dimensions -->
         <div class="calc-card">
-          <h3>1. Screw Length</h3>
-          <p>Select the screw length for your project. 1.25m is standard for most garden room foundations.</p>
+          <h3>2. Garden Room Dimensions</h3>
+          <p>Enter the overall footprint of your garden room in metres.</p>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="width">Width (m)</label>
+              <input type="number" id="width" min="0" step="0.1" placeholder="e.g. 4.0" />
+            </div>
+            <div class="form-group">
+              <label for="depth">Depth (m)</label>
+              <input type="number" id="depth" min="0" step="0.1" placeholder="e.g. 3.0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Screw length -->
+        <div class="calc-card">
+          <h3>3. Screw Length</h3>
+          <p>1.25m is our standard for most garden room foundations in SE England.</p>
           <div class="screw-grid">
             <button class="screw-card" data-screw="1m">
               <div class="screw-card-size">1m</div>
@@ -601,10 +666,10 @@
           </div>
         </div>
 
-        <!-- Step 2: Base type -->
+        <!-- Step 4: Base type -->
         <div class="calc-card">
-          <h3>2. Select Base Type</h3>
-          <p>Choosing your base type pre-fills the recommended maximum screw spacing — you can adjust below if needed.</p>
+          <h3>4. Select Base Type</h3>
+          <p>Choosing your base type pre-fills the recommended maximum screw spacing below.</p>
           <div class="base-grid">
             <button class="base-btn" data-base="sips">SIPs Base<small>Max 1.22m × 1.5m</small></button>
             <button class="base-btn" data-base="4x2">4"×2" Base<small>Max 1.2m × 1.2m</small></button>
@@ -614,26 +679,10 @@
           <p id="spacing-hint" style="display:none;"></p>
         </div>
 
-        <!-- Step 3: Dimensions -->
+        <!-- Step 5: Max spacing -->
         <div class="calc-card">
-          <h3>3. Garden Room Dimensions</h3>
-          <p>Enter the overall footprint of your garden room in metres.</p>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label for="width">Width (m)</label>
-              <input type="number" id="width" min="0" step="0.1" placeholder="e.g. 4.0" />
-            </div>
-            <div class="form-group">
-              <label for="depth">Depth (m)</label>
-              <input type="number" id="depth" min="0" step="0.1" placeholder="e.g. 3.0" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 4: Spacing override -->
-        <div class="calc-card">
-          <h3>4. Max Screw Spacing</h3>
-          <p>Auto-filled from your base type selection. Edit here if you need a custom spacing.</p>
+          <h3>5. Max Screw Spacing</h3>
+          <p>Auto-filled from your base type above. Edit here if you need a custom spacing.</p>
           <div class="form-grid-2">
             <div class="form-group">
               <label for="spacing-width">Max Spacing — Width (m)</label>
@@ -646,10 +695,10 @@
           </div>
         </div>
 
-        <!-- Step 5: Site details -->
+        <!-- Step 6: Site details -->
         <div class="calc-card">
-          <h3>5. Site Details</h3>
-          <div class="form-group" style="margin-bottom: 1.25rem;">
+          <h3>6. Site Details</h3>
+          <div class="form-group" style="margin-bottom:1.25rem;">
             <label for="postcode">Site Postcode or Address</label>
             <input type="text" id="postcode" placeholder="e.g. GU1 4RG or Guildford, Surrey" />
             <p class="form-note" style="text-align:left;margin-top:.4rem;">Used to estimate distance from our Lyne, Surrey base — for mileage information only</p>
@@ -677,18 +726,40 @@
           </div>
         </div>
 
-        <!-- Step 6: Email gate -->
+        <!-- Step 7: Your details -->
         <div class="calc-card">
-          <h3>6. Get Your Free Estimate</h3>
-          <p>Enter your details to see your price on-screen and receive a copy by email.</p>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label for="cust-name">Your Name *</label>
-              <input type="text" id="cust-name" placeholder="First &amp; last name" autocomplete="name" />
+          <h3>7. Get Your Free Estimate</h3>
+          <p>Enter your details to see your price on-screen instantly.</p>
+
+          <!-- Domestic fields -->
+          <div id="domestic-fields">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="cust-name">Your Name *</label>
+                <input type="text" id="cust-name" placeholder="First &amp; last name" autocomplete="name" />
+              </div>
+              <div class="form-group">
+                <label for="cust-email">Email Address *</label>
+                <input type="email" id="cust-email" placeholder="your@email.com" autocomplete="email" />
+              </div>
             </div>
-            <div class="form-group">
-              <label for="cust-email">Email Address *</label>
-              <input type="email" id="cust-email" placeholder="your@email.com" autocomplete="email" />
+          </div>
+
+          <!-- Trade fields -->
+          <div id="trade-fields" style="display:none;">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="biz-name">Business Name *</label>
+                <input type="text" id="biz-name" placeholder="Company name" />
+              </div>
+              <div class="form-group">
+                <label for="biz-email">Business Email *</label>
+                <input type="email" id="biz-email" placeholder="you@company.com" autocomplete="email" />
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:.75rem;">
+              <label for="biz-address">Business Address</label>
+              <input type="text" id="biz-address" placeholder="Town / postcode is fine" />
             </div>
           </div>
         </div>
@@ -698,26 +769,15 @@
         <div class="calc-actions">
           <button id="calculate-btn" class="btn btn-primary btn-lg" style="flex:1;justify-content:center;">
             <svg style="width:18px;height:18px;margin-right:.4rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Get My Price Estimate
+            Get My Estimate
           </button>
           <button id="reset-btn" class="btn btn-dark">Reset</button>
-        </div>
-
-      </div>
-
-      <!-- RIGHT: Result panel (sticky on desktop) -->
-      <div class="calc-result-sticky">
-        <div id="result-panel">
-          <div class="result-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            <p>Fill in the steps on the left and press <strong>Get My Price Estimate</strong> to see your quote.</p>
-          </div>
         </div>
 
         <!-- Pricing reference -->
         <details class="calc-card" style="margin-top:1.25rem;cursor:pointer;">
           <summary style="font-size:var(--fs-sm);font-weight:700;color:var(--dark);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-            <span id="pricing-heading">Pricing Reference (1.25m screws, domestic inc VAT)</span>
+            <span id="pricing-heading">Pricing Reference (1.25m screws, domestic — inc VAT)</span>
             <svg style="width:16px;height:16px;color:var(--grey-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div style="margin-top:1rem;overflow-x:auto;">
@@ -725,13 +785,12 @@
               <thead>
                 <tr style="background:var(--grey-50);">
                   <th style="padding:.5rem .75rem;text-align:left;font-weight:700;color:var(--grey-600);border:1px solid var(--grey-100);">Qty</th>
-                  <th style="padding:.5rem .75rem;text-align:right;font-weight:700;color:var(--grey-600);border:1px solid var(--grey-100);">Supply (inc VAT)</th>
-                  <th style="padding:.5rem .75rem;text-align:right;font-weight:700;color:var(--grey-600);border:1px solid var(--grey-100);">Install (inc VAT)</th>
+                  <th style="padding:.5rem .75rem;text-align:right;font-weight:700;color:var(--grey-600);border:1px solid var(--grey-100);">Supply</th>
+                  <th style="padding:.5rem .75rem;text-align:right;font-weight:700;color:var(--grey-600);border:1px solid var(--grey-100);">Install</th>
                 </tr>
               </thead>
               <tbody id="pricing-tbody"></tbody>
             </table>
-            <p style="font-size:.65rem;color:var(--grey-400);margin-top:.6rem;">All prices inc VAT. Standard 1.25m screws. Trade pricing available — <a href="contact.html" style="color:var(--green-600);">contact us</a>.</p>
           </div>
           <div style="margin-top:1.25rem;">
             <p style="font-size:.7rem;font-weight:700;color:var(--grey-600);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Travel Supplement (from KT16 0AN)</p>
@@ -739,19 +798,17 @@
               <table class="mileage-table">
                 <thead>
                   <tr>
-                    <th>Service</th>
-                    <th>Within 35 miles</th>
-                    <th>35–55 miles</th>
-                    <th>55–75 miles</th>
-                    <th>75+ miles</th>
+                    <th>Within 35 mi</th>
+                    <th>35–55 mi</th>
+                    <th>55–75 mi</th>
+                    <th>75+ mi</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style="font-weight:700;">Supply &amp; Install</td>
                     <td class="free">FREE</td>
-                    <td>£90 inc VAT<br><small style="color:var(--grey-400);">£75 ex VAT</small></td>
-                    <td>£180 inc VAT<br><small style="color:var(--grey-400);">£150 ex VAT</small></td>
+                    <td>£90 inc<br><small style="color:var(--grey-400);">£75 ex</small></td>
+                    <td>£180 inc<br><small style="color:var(--grey-400);">£150 ex</small></td>
                     <td class="poa">POA</td>
                   </tr>
                 </tbody>
@@ -759,9 +816,15 @@
             </div>
           </div>
         </details>
-      </div>
 
+      </div>
     </div>
+
+    <!-- Result section (shown after submission) -->
+    <div id="calc-result-section" style="display:none;">
+      <div id="calc-result-panel"></div>
+    </div>
+
   </div>
 </section>
 
