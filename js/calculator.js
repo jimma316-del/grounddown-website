@@ -1,16 +1,5 @@
-// ============================================================
-//  EMAILJS SETUP — fill in these four values
-//  1. Sign up free at https://www.emailjs.com
-//  2. Add an Email Service (Gmail etc.) → copy the Service ID
-//  3. Create a template for the customer quote  → copy Template ID
-//  4. Create a template for the sales notification → copy Template ID
-//  5. Account > API Keys → copy Public Key
-// ============================================================
-const EMAILJS_PUBLIC_KEY   = 'YOUR_PUBLIC_KEY'
-const EMAILJS_SERVICE_ID   = 'YOUR_SERVICE_ID'
-const CUSTOMER_TEMPLATE_ID = 'YOUR_CUSTOMER_TEMPLATE_ID'   // quote sent to customer
-const SALES_TEMPLATE_ID    = 'YOUR_SALES_TEMPLATE_ID'      // lead notification to sales
-const SALES_EMAIL          = 'sales@grounddown.co.uk'
+// Formspree endpoint (same as contact form — sends to sales@grounddown.co.uk)
+const FORMSPREE_URL = 'https://formspree.io/f/xnjwdglr'
 
 // ---- Pricing (domestic / residential only, inc VAT) ----
 const PRICING = [
@@ -29,19 +18,18 @@ const MILEAGE = [
 ]
 
 const BASE_CONFIGS = {
-  sips: { label: 'SIPs Base',   widthSpacing: 1.22, depthSpacing: 1.5  },
-  '4x2': { label: '4"×2" Base', widthSpacing: 1.2,  depthSpacing: 1.2  },
-  '5x2': { label: '5"×2" Base', widthSpacing: 1.5,  depthSpacing: 1.5  },
-  '6x2': { label: '6"×2" Base', widthSpacing: 1.8,  depthSpacing: 1.8  },
+  sips:  { label: 'SIPs Base',   widthSpacing: 1.22, depthSpacing: 1.5 },
+  '4x2': { label: '4"×2" Base', widthSpacing: 1.2,  depthSpacing: 1.2 },
+  '5x2': { label: '5"×2" Base', widthSpacing: 1.5,  depthSpacing: 1.5 },
+  '6x2': { label: '6"×2" Base', widthSpacing: 1.8,  depthSpacing: 1.8 },
 }
 
 const INSET  = 0.1
-const GD_LAT = 51.392   // Lyne, Surrey KT16 0AN
+const GD_LAT = 51.392
 const GD_LNG = -0.530
 
 let selectedBase = null
 
-// ---- Calculation helpers ----
 function calcScrews(width, depth, swid, sdep) {
   if (swid <= 0 || sdep <= 0 || width <= 0.2 || depth <= 0.2) return null
   const cols = Math.ceil((width - 2 * INSET) / swid) + 1
@@ -82,7 +70,6 @@ async function geocodeAddress(address) {
 
 function fmt(n) { return '£' + n.toFixed(0) }
 
-// ---- Base type selection ----
 function selectBase(key) {
   selectedBase = key
   const cfg = BASE_CONFIGS[key]
@@ -94,13 +81,11 @@ function selectBase(key) {
   hint.style.display = 'block'
 }
 
-// ---- Main submit handler ----
 async function handleSubmit() {
   const btn = document.getElementById('calculate-btn')
   const errorEl = document.getElementById('calc-error')
   errorEl.style.display = 'none'
 
-  // Validate dimensions + spacing
   const width = parseFloat(document.getElementById('width').value)
   const depth = parseFloat(document.getElementById('depth').value)
   const swid  = parseFloat(document.getElementById('spacing-width').value)
@@ -114,12 +99,11 @@ async function handleSubmit() {
 
   const sc = calcScrews(width, depth, swid, sdep)
   if (!sc || sc.total < 1) {
-    errorEl.textContent = 'Could not calculate screws — check your dimensions.'
+    errorEl.textContent = 'Could not calculate — check your dimensions.'
     errorEl.style.display = 'block'
     return
   }
 
-  // Validate email gate
   const custName  = document.getElementById('cust-name').value.trim()
   const custEmail = document.getElementById('cust-email').value.trim()
   if (!custName) { errorEl.textContent = 'Please enter your name.'; errorEl.style.display = 'block'; return }
@@ -132,28 +116,24 @@ async function handleSubmit() {
   btn.textContent = 'Calculating…'
   btn.disabled = true
 
-  // Site detail answers
   const power   = document.querySelector('input[name="power"]:checked')?.value  || 'Not specified'
   const access  = document.querySelector('input[name="access"]:checked')?.value || 'Not specified'
   const marked  = document.querySelector('input[name="marked"]:checked')?.value || 'Not specified'
   const addressInput = document.getElementById('postcode').value.trim()
 
-  // Pricing
-  const tier          = getPricing(sc.total)
-  const supplyTotal   = sc.total * tier.supplyInc
-  const installBase   = sc.total * tier.installedInc
-  const baseLabel     = selectedBase ? BASE_CONFIGS[selectedBase].label : 'Custom spacing'
+  const tier        = getPricing(sc.total)
+  const supplyTotal = sc.total * tier.supplyInc
+  const installBase = sc.total * tier.installedInc
+  const baseLabel   = selectedBase ? BASE_CONFIGS[selectedBase].label : 'Custom spacing'
 
-  // Mileage
   let miles = null
-  let mileageTier = MILEAGE[0] // default: within 35 miles / free
+  let mileageTier = MILEAGE[0]
 
   if (addressInput) {
     btn.textContent = 'Calculating distance…'
     const coords = await geocodeAddress(addressInput)
     if (coords) {
-      const straight = haversineMiles(GD_LAT, GD_LNG, coords.lat, coords.lng)
-      miles = Math.round(straight * 1.25)
+      miles = Math.round(haversineMiles(GD_LAT, GD_LNG, coords.lat, coords.lng) * 1.25)
       mileageTier = getMileageTier(miles)
     }
   }
@@ -162,65 +142,48 @@ async function handleSubmit() {
   const mileageChargeLabel = mileageTier.poa ? 'POA' : mileageTier.charge === 0 ? 'FREE' : fmt(mileageTier.charge)
   const installTotalLabel  = mileageTier.poa ? 'POA — contact us' : fmt(installTotal)
 
-  // Notices for site conditions
   const notices = []
-  if (power  === 'no') notices.push('⚡ No power on site — a generator may be required.')
-  if (access === 'no') notices.push('🚧 Limited site access — please mention this in your enquiry.')
-  if (marked === 'no') notices.push('📍 Screw locations not marked — a marking-out service can be arranged.')
+  if (power  === 'no') notices.push('No power on site — a generator may be required.')
+  if (access === 'no') notices.push('Limited site access — please mention this in your enquiry.')
+  if (marked === 'no') notices.push('Screw locations not marked — a marking-out service can be arranged.')
 
-  // Send emails via EmailJS
-  btn.textContent = 'Sending your quote…'
-
-  const templateVars = {
-    to_name:          custName,
-    to_email:         custEmail,
-    width:            width,
-    depth:            depth,
-    base_type:        baseLabel,
-    num_screws:       sc.total,
-    layout:           `${sc.rows} rows × ${sc.cols} wide`,
-    width_span:       sc.widthSpan.toFixed(3) + 'm',
-    depth_span:       sc.depthSpan.toFixed(3) + 'm',
-    supply_total:     fmt(supplyTotal),
-    install_base:     fmt(installBase),
-    mileage_label:    mileageTier.label,
-    mileage_charge:   mileageChargeLabel,
-    install_total:    installTotalLabel,
-    site_address:     addressInput || 'Not provided',
-    estimated_miles:  miles !== null ? miles + ' miles' : 'Not calculated',
-    power_on_site:    power,
-    clear_access:     access,
-    locations_marked: marked,
-    notices:          notices.length ? notices.join('\n') : 'None',
-    sales_email:      SALES_EMAIL,
-  }
-
+  // Notify sales via Formspree (fire and forget)
+  btn.textContent = 'Getting your quote…'
   try {
-    if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
-      emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY })
-      await Promise.all([
-        emailjs.send(EMAILJS_SERVICE_ID, CUSTOMER_TEMPLATE_ID, templateVars),
-        emailjs.send(EMAILJS_SERVICE_ID, SALES_TEMPLATE_ID, { ...templateVars, to_email: SALES_EMAIL }),
-      ])
-    }
-  } catch (err) {
-    console.warn('EmailJS send failed:', err)
-  }
+    const body = new FormData()
+    body.append('_subject', `Calculator lead: ${custName} — ${width}m × ${depth}m`)
+    body.append('Name', custName)
+    body.append('Email', custEmail)
+    body.append('Dimensions', `${width}m × ${depth}m`)
+    body.append('Base type', baseLabel)
+    body.append('Screws', `${sc.total} (${sc.rows} rows × ${sc.cols} wide)`)
+    body.append('Supply only', fmt(supplyTotal) + ' inc VAT')
+    body.append('Install (base)', fmt(installBase) + ' inc VAT')
+    body.append('Mileage', `${mileageTier.label} — ${mileageChargeLabel}`)
+    body.append('Install total', installTotalLabel + ' inc VAT')
+    body.append('Site address', addressInput || 'Not provided')
+    body.append('Est. miles', miles !== null ? miles + ' miles' : 'Not calculated')
+    body.append('Power on site', power)
+    body.append('Clear access', access)
+    body.append('Locations marked', marked)
+    body.append('_replyto', custEmail)
+    fetch(FORMSPREE_URL, { method: 'POST', body, headers: { Accept: 'application/json' } })
+  } catch {}
 
-  // Show result
   btn.textContent = 'Get My Price Estimate'
   btn.disabled = false
 
-  renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileageTier, mileageChargeLabel,
-    installTotalLabel, width, depth, swid, sdep, miles, addressInput, baseLabel, notices, custName })
+  renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileageTier,
+    mileageChargeLabel, installTotalLabel, width, depth, miles, addressInput,
+    baseLabel, notices, custName })
 }
 
-// ---- Render result panel ----
-function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileageTier, mileageChargeLabel,
-  installTotalLabel, width, depth, miles, addressInput, baseLabel, notices, custName }) {
+function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileageTier,
+  mileageChargeLabel, installTotalLabel, width, depth, miles, addressInput,
+  baseLabel, notices, custName }) {
 
-  const tierLabel = sc.total <= 19 ? '1–19' : sc.total <= 29 ? '20–29' : sc.total <= 39 ? '30–39' : '40+'
   const tierColor = sc.total >= 40 ? 'tier-best' : sc.total >= 30 ? 'tier-good' : sc.total >= 20 ? 'tier-mid' : 'tier-base'
+  const tierLabel = sc.total <= 19 ? '1–19' : sc.total <= 29 ? '20–29' : sc.total <= 39 ? '30–39' : '40+'
 
   const mileageRow = addressInput ? `
     <div class="result-meta-row">
@@ -228,28 +191,25 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
       <span>${miles !== null ? `Approx <strong>${miles} miles</strong> from our Lyne, Surrey base` : 'Distance could not be calculated'} &mdash; <strong>${mileageTier.label}</strong></span>
     </div>` : ''
 
-  const mileageInstallBox = mileageTier.charge > 0 ? `
-    <div class="mileage-line">
-      <span>Base install (${sc.total} × ${fmt(tier.installedInc)})</span><span>${fmt(installBase)}</span>
-    </div>
-    <div class="mileage-line mileage-surcharge">
-      <span>Travel supplement (${mileageTier.label})</span><span>+ ${fmt(mileageTier.charge)}</span>
-    </div>` : ''
-
-  const noticesHtml = notices.map(n => `
-    <div class="result-notice"><span class="notice-icon">${n.charAt(0)}</span><span>${n.slice(2)}</span></div>`).join('')
-
   const installBoxHtml = mileageTier.poa ? `
     <div class="price-box price-box--install poa-box">
       <p class="price-box-label">Supply &amp; Install</p>
       <p class="price-box-amount poa-amount">POA</p>
-      <p class="price-box-note">75+ miles — please contact us for a quote including mileage</p>
+      <p class="price-box-note">75+ miles — contact us for a quote including travel</p>
     </div>` : `
     <div class="price-box price-box--install">
       <p class="price-box-label">Supply &amp; Install${mileageTier.charge > 0 ? ' (inc travel)' : ''}</p>
       <p class="price-box-amount">${fmt(installTotal)}</p>
-      ${mileageTier.charge > 0 ? `<div class="mileage-breakdown">${mileageInstallBox}</div>` : `<p class="price-box-note">inc VAT · ${fmt(tier.installedInc)} per screw · travel FREE</p>`}
+      ${mileageTier.charge > 0
+        ? `<div class="mileage-breakdown">
+            <div class="mileage-line"><span>${sc.total} screws × ${fmt(tier.installedInc)}</span><span>${fmt(installBase)}</span></div>
+            <div class="mileage-line mileage-surcharge"><span>Travel (${mileageTier.label})</span><span>+ ${fmt(mileageTier.charge)}</span></div>
+           </div>`
+        : `<p class="price-box-note">inc VAT · ${fmt(tier.installedInc)} per screw · travel FREE</p>`}
     </div>`
+
+  const noticesHtml = notices.map(n => `
+    <div class="result-notice"><span class="notice-icon">⚠</span><span>${n}</span></div>`).join('')
 
   document.getElementById('result-panel').innerHTML = `
     <div class="result-card">
@@ -281,7 +241,6 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
 
       ${notices.length ? `<div class="result-notices">${noticesHtml}</div>` : ''}
 
-      <p class="result-email-sent">A copy of this estimate has been sent to your inbox.</p>
       <p class="result-disclaimer">Estimate based on standard 1.25m screws at domestic rates. Final quote confirmed within 1 working day.</p>
       <a href="contact.html" class="btn btn-primary btn-lg result-cta">Request a Formal Quote</a>
     </div>
@@ -290,7 +249,6 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
   document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-// ---- Reset ----
 function resetCalc() {
   selectedBase = null
   document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
@@ -307,12 +265,10 @@ function resetCalc() {
   document.getElementById('calc-error').style.display = 'none'
 }
 
-// ---- Init ----
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.base-btn').forEach(btn => {
     btn.addEventListener('click', () => selectBase(btn.dataset.base))
   })
-
   document.getElementById('spacing-width').addEventListener('input', () => {
     selectedBase = null
     document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
@@ -323,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
     document.getElementById('spacing-hint').style.display = 'none'
   })
-
   document.getElementById('calculate-btn').addEventListener('click', handleSubmit)
   document.getElementById('reset-btn').addEventListener('click', resetCalc)
 })
