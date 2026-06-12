@@ -31,20 +31,20 @@ const PRICING = {
   },
   trade: {
     '1m': [
-      { minQty:1,  maxQty:19,       supplyInc:32, supplyEx:26.7, installedInc:76,  installedEx:63.3 },
-      { minQty:20, maxQty:Infinity, supplyInc:30, supplyEx:25.0, installedInc:70,  installedEx:58.3 },
+      { minQty:1,  maxQty:19,       supplyInc:29, supplyEx:24.2, installedInc:76,  installedEx:63.3 },
+      { minQty:20, maxQty:Infinity, supplyInc:27, supplyEx:22.5, installedInc:70,  installedEx:58.3 },
     ],
     '1.25m': [
-      { minQty:1,  maxQty:19,       supplyInc:35, supplyEx:29.2, installedInc:78,  installedEx:65.0 },
-      { minQty:20, maxQty:Infinity, supplyInc:33, supplyEx:27.5, installedInc:72,  installedEx:60.0 },
+      { minQty:1,  maxQty:19,       supplyInc:32, supplyEx:26.7, installedInc:78,  installedEx:65.0 },
+      { minQty:20, maxQty:Infinity, supplyInc:30, supplyEx:25.0, installedInc:72,  installedEx:60.0 },
     ],
     '1.5m': [
-      { minQty:1,  maxQty:19,       supplyInc:40, supplyEx:33.3, installedInc:90,  installedEx:75.0 },
-      { minQty:20, maxQty:Infinity, supplyInc:37, supplyEx:30.8, installedInc:84,  installedEx:70.0 },
+      { minQty:1,  maxQty:19,       supplyInc:37, supplyEx:30.8, installedInc:90,  installedEx:75.0 },
+      { minQty:20, maxQty:Infinity, supplyInc:35, supplyEx:29.2, installedInc:84,  installedEx:70.0 },
     ],
     '2m': [
-      { minQty:1,  maxQty:19,       supplyInc:45, supplyEx:37.5, installedInc:108, installedEx:90.0 },
-      { minQty:20, maxQty:Infinity, supplyInc:42, supplyEx:35.0, installedInc:102, installedEx:85.0 },
+      { minQty:1,  maxQty:19,       supplyInc:42, supplyEx:35.0, installedInc:108, installedEx:90.0 },
+      { minQty:20, maxQty:Infinity, supplyInc:40, supplyEx:33.3, installedInc:102, installedEx:85.0 },
     ],
   },
 }
