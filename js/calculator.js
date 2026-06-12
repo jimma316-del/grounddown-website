@@ -202,17 +202,19 @@ async function handleSubmit() {
     return
   }
 
-  let contactName, contactEmail, contactPhone = '', bizAddress = ''
+  let contactName, contactEmail, contactPhone = '', bizAddress = '', bizContactName = ''
   if (customerType === 'domestic') {
     contactName  = document.getElementById('cust-name').value.trim()
     contactEmail = document.getElementById('cust-email').value.trim()
     contactPhone = document.getElementById('cust-phone').value.trim()
     if (!contactName) { errorEl.textContent = 'Please enter your name.'; errorEl.style.display = 'block'; return }
   } else {
-    contactName  = document.getElementById('biz-name').value.trim()
-    contactEmail = document.getElementById('biz-email').value.trim()
-    contactPhone = document.getElementById('biz-phone').value.trim()
-    bizAddress   = document.getElementById('biz-address').value.trim()
+    bizContactName = document.getElementById('biz-contact-name').value.trim()
+    contactName    = document.getElementById('biz-name').value.trim()
+    contactEmail   = document.getElementById('biz-email').value.trim()
+    contactPhone   = document.getElementById('biz-phone').value.trim()
+    bizAddress     = document.getElementById('biz-address').value.trim()
+    if (!bizContactName) { errorEl.textContent = 'Please enter your name.'; errorEl.style.display = 'block'; return }
     if (!contactName) { errorEl.textContent = 'Please enter your business name.'; errorEl.style.display = 'block'; return }
   }
   if (!contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
@@ -266,6 +268,7 @@ async function handleSubmit() {
 
   const jobDetails = [
     `Customer type: ${isTrade ? 'Trade' : 'Domestic'}`,
+    isTrade && contactName ? `Company: ${contactName}` : null,
     `Screw length: ${selectedScrewLength}`,
     `Dimensions: ${width}m × ${depth}m`,
     `Base type: ${baseLabel}`,
@@ -282,6 +285,7 @@ async function handleSubmit() {
   try {
     const formBody = new FormData()
     formBody.append('_subject', `${isTrade ? 'TRADE' : 'Calculator'} lead: ${contactName} — ${width}m × ${depth}m (${selectedScrewLength} screws)`)
+    if (isTrade) formBody.append('Name', bizContactName)
     formBody.append(isTrade ? 'Business name' : 'Name',  contactName)
     formBody.append(isTrade ? 'Business email' : 'Email', contactEmail)
     if (contactPhone) formBody.append('Phone', contactPhone)
@@ -309,7 +313,7 @@ async function handleSubmit() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': CRM_API_KEY },
       body: JSON.stringify({
-        name:         contactName,
+        name:         isTrade ? bizContactName : contactName,
         email:        contactEmail || null,
         phone:        contactPhone || null,
         site_address: addressInput || (isTrade && bizAddress ? bizAddress : null),
@@ -378,7 +382,7 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
   const noticesHtml = notices.map(n => `
     <div class="result-notice"><span class="notice-icon">⚠</span><span>${n}</span></div>`).join('')
 
-  const displayName = isTrade ? contactName : contactName.split(' ')[0]
+  const displayName = isTrade ? bizContactName.split(' ')[0] : contactName.split(' ')[0]
   const disclaimer  = isTrade
     ? `Trade estimate — ${selectedScrewLength} screws. Formal quote confirmed within 1 working day. Trade accounts available on request.`
     : `Estimate based on ${selectedScrewLength} screws at domestic rates inc VAT. Final quote confirmed within 1 working day.`
@@ -433,7 +437,8 @@ function resetCalc() {
   document.querySelectorAll('[data-screw]').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
   document.getElementById('spacing-hint').style.display = 'none'
   ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode',
-    'cust-name', 'cust-email', 'cust-phone', 'biz-name', 'biz-email', 'biz-phone', 'biz-address'].forEach(id => {
+    'cust-name', 'cust-email', 'cust-phone',
+    'biz-contact-name', 'biz-name', 'biz-email', 'biz-phone', 'biz-address'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.value = ''
   })
