@@ -1,4 +1,6 @@
-const FORMSPREE_URL = 'https://formspree.io/f/xnjwdglr'
+const FORMSPREE_URL   = 'https://formspree.io/f/xnjwdglr'
+const CRM_API_URL     = 'https://ground-down-crm.vercel.app/api/leads/from-calculator'
+const CRM_API_KEY     = 'gd-calc-k9x4m2p8'
 
 const PRICING = {
   domestic: {
@@ -200,14 +202,16 @@ async function handleSubmit() {
     return
   }
 
-  let contactName, contactEmail, bizAddress = ''
+  let contactName, contactEmail, contactPhone = '', bizAddress = ''
   if (customerType === 'domestic') {
     contactName  = document.getElementById('cust-name').value.trim()
     contactEmail = document.getElementById('cust-email').value.trim()
+    contactPhone = document.getElementById('cust-phone').value.trim()
     if (!contactName) { errorEl.textContent = 'Please enter your name.'; errorEl.style.display = 'block'; return }
   } else {
     contactName  = document.getElementById('biz-name').value.trim()
     contactEmail = document.getElementById('biz-email').value.trim()
+    contactPhone = document.getElementById('biz-phone').value.trim()
     bizAddress   = document.getElementById('biz-address').value.trim()
     if (!contactName) { errorEl.textContent = 'Please enter your business name.'; errorEl.style.display = 'block'; return }
   }
@@ -259,27 +263,59 @@ async function handleSubmit() {
   if (marked === 'no') notices.push('Screw locations not marked — a marking-out service can be arranged.')
 
   btn.textContent = 'Getting your quote…'
+
+  const jobDetails = [
+    `Customer type: ${isTrade ? 'Trade' : 'Domestic'}`,
+    `Screw length: ${selectedScrewLength}`,
+    `Dimensions: ${width}m × ${depth}m`,
+    `Base type: ${baseLabel}`,
+    `Screws: ${sc.total} (${sc.rows} rows × ${sc.cols} wide)`,
+    `Supply only: ${fmtInc(supplyTotalInc)}${isTrade ? ` inc / ${fmtEx(supplyTotalEx)} ex VAT` : ' inc VAT'}`,
+    `Install total: ${installTotalInc ? fmtInc(installTotalInc) + (isTrade ? ` inc / ${fmtEx(installTotalEx)} ex VAT` : ' inc VAT') : 'POA'}`,
+    `Mileage: ${mileageTier.label}${miles !== null ? ` (~${miles} miles)` : ''} — ${mileageChargeLabel}`,
+    addressInput ? `Site postcode: ${addressInput}` : null,
+    `Power on site: ${power}`,
+    `Clear access: ${access}`,
+    `Locations marked: ${marked}`,
+  ].filter(Boolean).join('\n')
+
   try {
-    const body = new FormData()
-    body.append('_subject', `${isTrade ? 'TRADE' : 'Calculator'} lead: ${contactName} — ${width}m × ${depth}m (${selectedScrewLength} screws)`)
-    body.append(isTrade ? 'Business name' : 'Name',  contactName)
-    body.append(isTrade ? 'Business email' : 'Email', contactEmail)
-    if (bizAddress) body.append('Business address', bizAddress)
-    body.append('Customer type', customerType)
-    body.append('Screw length',  selectedScrewLength)
-    body.append('Dimensions',    `${width}m × ${depth}m`)
-    body.append('Base type',     baseLabel)
-    body.append('Screws',        `${sc.total} (${sc.rows} rows × ${sc.cols} wide)`)
-    body.append('Supply only',   fmtInc(supplyTotalInc) + (isTrade ? ` inc / ${fmtEx(supplyTotalEx)} ex VAT` : ' inc VAT'))
-    body.append('Mileage',       `${mileageTier.label} — ${mileageChargeLabel}`)
-    body.append('Install total', installTotalInc ? fmtInc(installTotalInc) + (isTrade ? ` inc / ${fmtEx(installTotalEx)} ex VAT` : ' inc VAT') : 'POA')
-    body.append('Site address',  addressInput || 'Not provided')
-    body.append('Est. miles',    miles !== null ? miles + ' miles' : 'Not calculated')
-    body.append('Power on site', power)
-    body.append('Clear access',  access)
-    body.append('Locations marked', marked)
-    body.append('_replyto', contactEmail)
-    fetch(FORMSPREE_URL, { method: 'POST', body, headers: { Accept: 'application/json' } })
+    const formBody = new FormData()
+    formBody.append('_subject', `${isTrade ? 'TRADE' : 'Calculator'} lead: ${contactName} — ${width}m × ${depth}m (${selectedScrewLength} screws)`)
+    formBody.append(isTrade ? 'Business name' : 'Name',  contactName)
+    formBody.append(isTrade ? 'Business email' : 'Email', contactEmail)
+    if (contactPhone) formBody.append('Phone', contactPhone)
+    if (bizAddress) formBody.append('Business address', bizAddress)
+    formBody.append('Customer type', customerType)
+    formBody.append('Screw length',  selectedScrewLength)
+    formBody.append('Dimensions',    `${width}m × ${depth}m`)
+    formBody.append('Base type',     baseLabel)
+    formBody.append('Screws',        `${sc.total} (${sc.rows} rows × ${sc.cols} wide)`)
+    formBody.append('Supply only',   fmtInc(supplyTotalInc) + (isTrade ? ` inc / ${fmtEx(supplyTotalEx)} ex VAT` : ' inc VAT'))
+    formBody.append('Mileage',       `${mileageTier.label} — ${mileageChargeLabel}`)
+    formBody.append('Install total', installTotalInc ? fmtInc(installTotalInc) + (isTrade ? ` inc / ${fmtEx(installTotalEx)} ex VAT` : ' inc VAT') : 'POA')
+    formBody.append('Site address',  addressInput || 'Not provided')
+    formBody.append('Est. miles',    miles !== null ? miles + ' miles' : 'Not calculated')
+    formBody.append('Power on site', power)
+    formBody.append('Clear access',  access)
+    formBody.append('Locations marked', marked)
+    formBody.append('_replyto', contactEmail)
+    fetch(FORMSPREE_URL, { method: 'POST', body: formBody, headers: { Accept: 'application/json' } })
+  } catch {}
+
+  // Add to CRM as a new lead
+  try {
+    fetch(CRM_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': CRM_API_KEY },
+      body: JSON.stringify({
+        name:         contactName,
+        email:        contactEmail || null,
+        phone:        contactPhone || null,
+        site_address: addressInput || (isTrade && bizAddress ? bizAddress : null),
+        job_details:  jobDetails,
+      }),
+    })
   } catch {}
 
   btn.textContent = 'Get My Estimate'
@@ -397,7 +433,7 @@ function resetCalc() {
   document.querySelectorAll('[data-screw]').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
   document.getElementById('spacing-hint').style.display = 'none'
   ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode',
-    'cust-name', 'cust-email', 'biz-name', 'biz-email', 'biz-address'].forEach(id => {
+    'cust-name', 'cust-email', 'cust-phone', 'biz-name', 'biz-email', 'biz-phone', 'biz-address'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.value = ''
   })
