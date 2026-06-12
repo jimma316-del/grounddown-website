@@ -1,16 +1,30 @@
 const FORMSPREE_URL = 'https://formspree.io/f/xnjwdglr'
 
-// Trade pricing (inc & ex VAT)
-const PRICING = [
-  { minQty: 1,  maxQty: 19,  supplyInc: 30, supplyEx: 25, installedInc: 78, installedEx: 65 },
-  { minQty: 20, maxQty: Infinity, supplyInc: 30, supplyEx: 25, installedInc: 72, installedEx: 60 },
-]
+// Trade pricing keyed by screw length, inc and ex VAT
+const PRICING = {
+  '1m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 32, supplyEx: 26.7, installedInc: 76, installedEx: 63.3 },
+    { minQty: 20, maxQty: Infinity, supplyInc: 30, supplyEx: 25.0, installedInc: 70, installedEx: 58.3 },
+  ],
+  '1.25m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 35, supplyEx: 29.2, installedInc: 78, installedEx: 65.0 },
+    { minQty: 20, maxQty: Infinity, supplyInc: 33, supplyEx: 27.5, installedInc: 72, installedEx: 60.0 },
+  ],
+  '1.5m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 40, supplyEx: 33.3, installedInc: 90, installedEx: 75.0 },
+    { minQty: 20, maxQty: Infinity, supplyInc: 37, supplyEx: 30.8, installedInc: 84, installedEx: 70.0 },
+  ],
+  '2m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 45, supplyEx: 37.5, installedInc: 108, installedEx: 90.0 },
+    { minQty: 20, maxQty: Infinity, supplyInc: 42, supplyEx: 35.0, installedInc: 102, installedEx: 85.0 },
+  ],
+}
 
 const MILEAGE = [
-  { maxMiles: 35,       label: 'Within 35 miles', charge: 0,   poa: false },
-  { maxMiles: 55,       label: '35–55 miles',      charge: 75,  poa: false },
-  { maxMiles: 75,       label: '55–75 miles',      charge: 150, poa: false },
-  { maxMiles: Infinity, label: '75+ miles',         charge: 0,   poa: true  },
+  { maxMiles: 35,       label: 'Within 35 miles', chargeEx: 0,   chargeInc: 0,   poa: false },
+  { maxMiles: 55,       label: '35–55 miles',      chargeEx: 75,  chargeInc: 90,  poa: false },
+  { maxMiles: 75,       label: '55–75 miles',      chargeEx: 150, chargeInc: 180, poa: false },
+  { maxMiles: Infinity, label: '75+ miles',         chargeEx: 0,   chargeInc: 0,   poa: true  },
 ]
 
 const BASE_CONFIGS = {
@@ -24,6 +38,7 @@ const INSET  = 0.1
 const GD_LAT = 51.392
 const GD_LNG = -0.530
 
+let selectedScrewLength = '1.25m'
 let selectedBase = null
 
 function calcScrews(width, depth, swid, sdep) {
@@ -36,7 +51,8 @@ function calcScrews(width, depth, swid, sdep) {
 }
 
 function getPricing(qty) {
-  return PRICING.find(t => qty >= t.minQty && qty <= t.maxQty) || PRICING[PRICING.length - 1]
+  const tiers = PRICING[selectedScrewLength]
+  return tiers.find(t => qty >= t.minQty && qty <= t.maxQty) || tiers[tiers.length - 1]
 }
 
 function getMileageTier(miles) {
@@ -64,8 +80,15 @@ async function geocodeAddress(address) {
   return null
 }
 
-function fmtInc(n) { return '£' + n.toFixed(0) + ' inc VAT' }
-function fmtEx(n)  { return '£' + n.toFixed(0) + ' ex VAT' }
+function fmtInc(n) { return '£' + n.toFixed(0) }
+function fmtEx(n)  { return '£' + (+n.toFixed(2)) }
+
+function selectScrewLength(len) {
+  selectedScrewLength = len
+  document.querySelectorAll('.screw-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.screw === len))
+  clearResult()
+  updatePricingTable()
+}
 
 function selectBase(key) {
   selectedBase = key
@@ -76,6 +99,29 @@ function selectBase(key) {
   const hint = document.getElementById('spacing-hint')
   hint.textContent = `Auto-filled: max ${cfg.widthSpacing}m wide · ${cfg.depthSpacing}m deep — edit below if needed`
   hint.style.display = 'block'
+}
+
+function updatePricingTable() {
+  const tiers = PRICING[selectedScrewLength]
+  const labels = ['1–19', '20+']
+  const tbody = document.getElementById('pricing-tbody')
+  if (!tbody) return
+  tbody.innerHTML = tiers.map((t, i) => `
+    <tr${i % 2 ? ' style="background:var(--grey-50);"' : ''}>
+      <td style="padding:.5rem .75rem;border:1px solid var(--grey-100);font-weight:600;">${labels[i] || '20+'}</td>
+      <td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£${fmtEx(t.supplyEx)} / ${fmtInc(t.supplyInc)}</td>
+      <td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£${fmtEx(t.installedEx)} / ${fmtInc(t.installedInc)}</td>
+    </tr>`).join('')
+  const heading = document.getElementById('pricing-heading')
+  if (heading) heading.textContent = `Pricing Reference (${selectedScrewLength} screws, trade — ex VAT / inc VAT)`
+}
+
+function clearResult() {
+  document.getElementById('result-panel').innerHTML = `
+    <div class="result-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <p>Fill in the steps on the left and press <strong>Get My Trade Estimate</strong> to see your quote.</p>
+    </div>`
 }
 
 async function handleSubmit() {
@@ -89,7 +135,7 @@ async function handleSubmit() {
   const sdep  = parseFloat(document.getElementById('spacing-depth').value)
 
   if (!width || !depth || !swid || !sdep || width <= 0 || depth <= 0 || swid <= 0 || sdep <= 0) {
-    errorEl.textContent = 'Please enter valid dimensions and spacing values (steps 2 & 3).'
+    errorEl.textContent = 'Please enter valid dimensions and spacing values.'
     errorEl.style.display = 'block'
     return
   }
@@ -120,12 +166,12 @@ async function handleSubmit() {
   const marked  = document.querySelector('input[name="marked"]:checked')?.value || 'Not specified'
   const addressInput = document.getElementById('postcode').value.trim()
 
-  const tier        = getPricing(sc.total)
+  const tier           = getPricing(sc.total)
   const supplyTotalInc = sc.total * tier.supplyInc
   const supplyTotalEx  = sc.total * tier.supplyEx
   const installBaseInc = sc.total * tier.installedInc
   const installBaseEx  = sc.total * tier.installedEx
-  const baseLabel   = selectedBase ? BASE_CONFIGS[selectedBase].label : 'Custom spacing'
+  const baseLabel      = selectedBase ? BASE_CONFIGS[selectedBase].label : 'Custom spacing'
 
   let miles = null
   let mileageTier = MILEAGE[0]
@@ -139,31 +185,30 @@ async function handleSubmit() {
     }
   }
 
-  const installTotalInc    = mileageTier.poa ? null : installBaseInc + mileageTier.charge
-  const installTotalEx     = mileageTier.poa ? null : installBaseEx  + mileageTier.charge
-  const mileageChargeLabel = mileageTier.poa ? 'POA' : mileageTier.charge === 0 ? 'FREE' : '£' + mileageTier.charge
-  const installTotalLabel  = mileageTier.poa ? 'POA — contact us' : fmtInc(installTotalInc)
+  const installTotalInc    = mileageTier.poa ? null : installBaseInc + mileageTier.chargeInc
+  const installTotalEx     = mileageTier.poa ? null : installBaseEx  + mileageTier.chargeEx
+  const mileageChargeLabel = mileageTier.poa ? 'POA' : mileageTier.chargeEx === 0 ? 'FREE' : `£${mileageTier.chargeEx} ex VAT`
 
   const notices = []
   if (power  === 'no') notices.push('No power on site — a generator may be required.')
   if (access === 'no') notices.push('Limited site access — please mention this in your enquiry.')
   if (marked === 'no') notices.push('Screw locations not marked — a marking-out service can be arranged.')
 
-  // Notify sales via Formspree
   btn.textContent = 'Getting your quote…'
   try {
     const body = new FormData()
-    body.append('_subject', `TRADE calculator lead: ${bizName} — ${width}m × ${depth}m`)
+    body.append('_subject', `TRADE calculator lead: ${bizName} — ${width}m × ${depth}m (${selectedScrewLength} screws)`)
     body.append('Business name', bizName)
     body.append('Business email', bizEmail)
     body.append('Business address', bizAddress || 'Not provided')
+    body.append('Screw length', selectedScrewLength)
     body.append('Dimensions', `${width}m × ${depth}m`)
     body.append('Base type', baseLabel)
     body.append('Screws', `${sc.total} (${sc.rows} rows × ${sc.cols} wide)`)
-    body.append('Supply only', fmtInc(supplyTotalInc) + ' / ' + fmtEx(supplyTotalEx))
-    body.append('Install (base)', fmtInc(installBaseInc) + ' / ' + fmtEx(installBaseEx))
+    body.append('Supply only', `${fmtInc(supplyTotalInc)} inc / £${fmtEx(supplyTotalEx)} ex VAT`)
+    body.append('Install (base)', `${fmtInc(installBaseInc)} inc / £${fmtEx(installBaseEx)} ex VAT`)
     body.append('Mileage', `${mileageTier.label} — ${mileageChargeLabel}`)
-    body.append('Install total', installTotalLabel)
+    body.append('Install total', mileageTier.poa ? 'POA' : `${fmtInc(installTotalInc)} inc / £${fmtEx(installTotalEx)} ex VAT`)
     body.append('Site address', addressInput || 'Not provided')
     body.append('Est. miles', miles !== null ? miles + ' miles' : 'Not calculated')
     body.append('Power on site', power)
@@ -201,15 +246,15 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
       <p class="price-box-note">75+ miles — contact us for a quote including travel</p>
     </div>` : `
     <div class="price-box price-box--install">
-      <p class="price-box-label">Supply &amp; Install${mileageTier.charge > 0 ? ' (inc travel)' : ''}</p>
-      <p class="price-box-amount">£${installTotalInc.toFixed(0)}</p>
-      <p class="price-box-note-ex">£${installTotalEx.toFixed(0)} ex VAT</p>
-      ${mileageTier.charge > 0
+      <p class="price-box-label">Supply &amp; Install${mileageTier.chargeEx > 0 ? ' (inc travel)' : ''}</p>
+      <p class="price-box-amount">${fmtInc(installTotalInc)}</p>
+      <p class="price-box-note-ex">£${fmtEx(installTotalEx)} ex VAT</p>
+      ${mileageTier.chargeEx > 0
         ? `<div class="mileage-breakdown">
-            <div class="mileage-line"><span>${sc.total} × £${tier.installedInc} inc VAT</span><span>£${installBaseInc.toFixed(0)}</span></div>
-            <div class="mileage-line mileage-surcharge"><span>Travel (${mileageTier.label})</span><span>+ £${mileageTier.charge}</span></div>
+            <div class="mileage-line"><span>${sc.total} × £${fmtEx(tier.installedEx)} ex VAT</span><span>£${fmtEx(installBaseEx)}</span></div>
+            <div class="mileage-line mileage-surcharge"><span>Travel (${mileageTier.label})</span><span>+ £${mileageTier.chargeEx} ex VAT</span></div>
            </div>`
-        : `<p class="price-box-note">£${tier.installedEx}/ea ex VAT · travel FREE</p>`}
+        : `<p class="price-box-note">£${fmtEx(tier.installedEx)} ex VAT per screw · travel FREE</p>`}
     </div>`
 
   const noticesHtml = notices.map(n => `
@@ -221,17 +266,17 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
         <div>
           <p class="result-label">${bizName} — trade estimate</p>
           <p class="result-big-num">${sc.total}</p>
-          <p class="result-sub">${sc.rows} rows × ${sc.cols} wide · ${width}m × ${depth}m · ${baseLabel}</p>
+          <p class="result-sub">${sc.rows} rows × ${sc.cols} wide · ${width}m × ${depth}m · ${baseLabel} · ${selectedScrewLength} screws</p>
         </div>
-        <span class="tier-badge ${tierColor}">${tierLabel} screws · £${tier.installedEx}/ea ex VAT</span>
+        <span class="tier-badge ${tierColor}">${tierLabel} screws · £${fmtEx(tier.installedEx)} ex VAT</span>
       </div>
 
       <div class="result-grid">
         <div class="price-box price-box--supply">
           <p class="price-box-label">Supply Only</p>
-          <p class="price-box-amount">£${supplyTotalInc.toFixed(0)}</p>
-          <p class="price-box-note-ex">£${supplyTotalEx.toFixed(0)} ex VAT</p>
-          <p class="price-box-note">£${tier.supplyEx}/ea ex VAT</p>
+          <p class="price-box-amount">${fmtInc(supplyTotalInc)}</p>
+          <p class="price-box-note-ex">£${fmtEx(supplyTotalEx)} ex VAT</p>
+          <p class="price-box-note">£${fmtEx(tier.supplyEx)} ex VAT per screw</p>
         </div>
         ${installBoxHtml}
       </div>
@@ -246,7 +291,7 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
 
       ${notices.length ? `<div class="result-notices">${noticesHtml}</div>` : ''}
 
-      <p class="result-disclaimer">Trade estimate — standard 1.25m screws. Formal quote confirmed within 1 working day. Trade accounts available on request.</p>
+      <p class="result-disclaimer">Trade estimate — ${selectedScrewLength} screws. Formal quote confirmed within 1 working day. Trade accounts available on request.</p>
       <a href="contact.html" class="btn btn-primary btn-lg result-cta">Request a Formal Quote</a>
     </div>
   `
@@ -256,21 +301,23 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
 
 function resetCalc() {
   selectedBase = null
+  selectedScrewLength = '1.25m'
   document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.screw-btn').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
   document.getElementById('spacing-hint').style.display = 'none'
   ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode', 'biz-name', 'biz-email', 'biz-address'].forEach(id => {
     document.getElementById(id).value = ''
   })
   document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false)
-  document.getElementById('result-panel').innerHTML = `
-    <div class="result-empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      <p>Fill in the steps on the left and press <strong>Get My Trade Estimate</strong> to see your quote.</p>
-    </div>`
+  clearResult()
   document.getElementById('calc-error').style.display = 'none'
+  updatePricingTable()
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.screw-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectScrewLength(btn.dataset.screw))
+  })
   document.querySelectorAll('.base-btn').forEach(btn => {
     btn.addEventListener('click', () => selectBase(btn.dataset.base))
   })
@@ -286,4 +333,5 @@ document.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('calculate-btn').addEventListener('click', handleSubmit)
   document.getElementById('reset-btn').addEventListener('click', resetCalc)
+  updatePricingTable()
 })

@@ -1,20 +1,39 @@
-// Formspree endpoint (same as contact form — sends to sales@grounddown.co.uk)
 const FORMSPREE_URL = 'https://formspree.io/f/xnjwdglr'
 
-// ---- Pricing (domestic / residential only, inc VAT) ----
-const PRICING = [
-  { minQty: 1,  maxQty: 19,  supplyInc: 39, installedInc: 90 },
-  { minQty: 20, maxQty: 29,  supplyInc: 35, installedInc: 84 },
-  { minQty: 30, maxQty: 39,  supplyInc: 35, installedInc: 78 },
-  { minQty: 40, maxQty: Infinity, supplyInc: 35, installedInc: 72 },
-]
+// Domestic pricing keyed by screw length, inc VAT only
+const PRICING = {
+  '1m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 30, installedInc: 87 },
+    { minQty: 20, maxQty: 29,  supplyInc: 29, installedInc: 81 },
+    { minQty: 30, maxQty: 39,  supplyInc: 28, installedInc: 76 },
+    { minQty: 40, maxQty: Infinity, supplyInc: 27, installedInc: 70 },
+  ],
+  '1.25m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 33, installedInc: 90 },
+    { minQty: 20, maxQty: 29,  supplyInc: 32, installedInc: 84 },
+    { minQty: 30, maxQty: 39,  supplyInc: 31, installedInc: 78 },
+    { minQty: 40, maxQty: Infinity, supplyInc: 30, installedInc: 72 },
+  ],
+  '1.5m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 39, installedInc: 102 },
+    { minQty: 20, maxQty: 29,  supplyInc: 37, installedInc: 96  },
+    { minQty: 30, maxQty: 39,  supplyInc: 36, installedInc: 90  },
+    { minQty: 40, maxQty: Infinity, supplyInc: 35, installedInc: 84 },
+  ],
+  '2m': [
+    { minQty: 1,  maxQty: 19,  supplyInc: 44, installedInc: 120 },
+    { minQty: 20, maxQty: 29,  supplyInc: 42, installedInc: 114 },
+    { minQty: 30, maxQty: 39,  supplyInc: 41, installedInc: 108 },
+    { minQty: 40, maxQty: Infinity, supplyInc: 40, installedInc: 102 },
+  ],
+}
 
-// ---- Mileage pricing (distance from KT16 0AN) ----
+// Mileage: chargeInc = inc VAT amount added to install total
 const MILEAGE = [
-  { maxMiles: 35,       label: 'Within 35 miles', charge: 0,   poa: false },
-  { maxMiles: 55,       label: '35–55 miles',      charge: 75,  poa: false },
-  { maxMiles: 75,       label: '55–75 miles',      charge: 150, poa: false },
-  { maxMiles: Infinity, label: '75+ miles',         charge: 0,   poa: true  },
+  { maxMiles: 35,       label: 'Within 35 miles', chargeEx: 0,   chargeInc: 0,   poa: false },
+  { maxMiles: 55,       label: '35–55 miles',      chargeEx: 75,  chargeInc: 90,  poa: false },
+  { maxMiles: 75,       label: '55–75 miles',      chargeEx: 150, chargeInc: 180, poa: false },
+  { maxMiles: Infinity, label: '75+ miles',         chargeEx: 0,   chargeInc: 0,   poa: true  },
 ]
 
 const BASE_CONFIGS = {
@@ -28,6 +47,7 @@ const INSET  = 0.1
 const GD_LAT = 51.392
 const GD_LNG = -0.530
 
+let selectedScrewLength = '1.25m'
 let selectedBase = null
 
 function calcScrews(width, depth, swid, sdep) {
@@ -40,7 +60,8 @@ function calcScrews(width, depth, swid, sdep) {
 }
 
 function getPricing(qty) {
-  return PRICING.find(t => qty >= t.minQty && qty <= t.maxQty) || PRICING[PRICING.length - 1]
+  const tiers = PRICING[selectedScrewLength]
+  return tiers.find(t => qty >= t.minQty && qty <= t.maxQty) || tiers[tiers.length - 1]
 }
 
 function getMileageTier(miles) {
@@ -70,6 +91,13 @@ async function geocodeAddress(address) {
 
 function fmt(n) { return '£' + n.toFixed(0) }
 
+function selectScrewLength(len) {
+  selectedScrewLength = len
+  document.querySelectorAll('.screw-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.screw === len))
+  clearResult()
+  updatePricingTable()
+}
+
 function selectBase(key) {
   selectedBase = key
   const cfg = BASE_CONFIGS[key]
@@ -79,6 +107,29 @@ function selectBase(key) {
   const hint = document.getElementById('spacing-hint')
   hint.textContent = `Auto-filled: max ${cfg.widthSpacing}m wide · ${cfg.depthSpacing}m deep — edit below if needed`
   hint.style.display = 'block'
+}
+
+function updatePricingTable() {
+  const tiers = PRICING[selectedScrewLength]
+  const labels = ['1–19', '20–29', '30–39', '40+']
+  const tbody = document.getElementById('pricing-tbody')
+  if (!tbody) return
+  tbody.innerHTML = tiers.map((t, i) => `
+    <tr${i % 2 ? ' style="background:var(--grey-50);"' : ''}>
+      <td style="padding:.5rem .75rem;border:1px solid var(--grey-100);font-weight:600;">${labels[i]}</td>
+      <td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">${fmt(t.supplyInc)} / screw</td>
+      <td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">${fmt(t.installedInc)} / screw</td>
+    </tr>`).join('')
+  const heading = document.getElementById('pricing-heading')
+  if (heading) heading.textContent = `Pricing Reference (${selectedScrewLength} screws, domestic inc VAT)`
+}
+
+function clearResult() {
+  document.getElementById('result-panel').innerHTML = `
+    <div class="result-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <p>Fill in the steps on the left and press <strong>Get My Price Estimate</strong> to see your quote.</p>
+    </div>`
 }
 
 async function handleSubmit() {
@@ -92,7 +143,7 @@ async function handleSubmit() {
   const sdep  = parseFloat(document.getElementById('spacing-depth').value)
 
   if (!width || !depth || !swid || !sdep || width <= 0 || depth <= 0 || swid <= 0 || sdep <= 0) {
-    errorEl.textContent = 'Please enter valid dimensions and spacing values (steps 2 & 3).'
+    errorEl.textContent = 'Please enter valid dimensions and spacing values.'
     errorEl.style.display = 'block'
     return
   }
@@ -138,8 +189,8 @@ async function handleSubmit() {
     }
   }
 
-  const installTotal       = mileageTier.poa ? null : installBase + mileageTier.charge
-  const mileageChargeLabel = mileageTier.poa ? 'POA' : mileageTier.charge === 0 ? 'FREE' : fmt(mileageTier.charge)
+  const installTotal       = mileageTier.poa ? null : installBase + mileageTier.chargeInc
+  const mileageChargeLabel = mileageTier.poa ? 'POA' : mileageTier.chargeInc === 0 ? 'FREE' : `${fmt(mileageTier.chargeInc)} inc VAT (${fmt(mileageTier.chargeEx)} ex VAT)`
   const installTotalLabel  = mileageTier.poa ? 'POA — contact us' : fmt(installTotal)
 
   const notices = []
@@ -147,20 +198,20 @@ async function handleSubmit() {
   if (access === 'no') notices.push('Limited site access — please mention this in your enquiry.')
   if (marked === 'no') notices.push('Screw locations not marked — a marking-out service can be arranged.')
 
-  // Notify sales via Formspree (fire and forget)
   btn.textContent = 'Getting your quote…'
   try {
     const body = new FormData()
-    body.append('_subject', `Calculator lead: ${custName} — ${width}m × ${depth}m`)
+    body.append('_subject', `Calculator lead: ${custName} — ${width}m × ${depth}m (${selectedScrewLength} screws)`)
     body.append('Name', custName)
     body.append('Email', custEmail)
+    body.append('Screw length', selectedScrewLength)
     body.append('Dimensions', `${width}m × ${depth}m`)
     body.append('Base type', baseLabel)
     body.append('Screws', `${sc.total} (${sc.rows} rows × ${sc.cols} wide)`)
     body.append('Supply only', fmt(supplyTotal) + ' inc VAT')
     body.append('Install (base)', fmt(installBase) + ' inc VAT')
     body.append('Mileage', `${mileageTier.label} — ${mileageChargeLabel}`)
-    body.append('Install total', installTotalLabel + ' inc VAT')
+    body.append('Install total', installTotalLabel)
     body.append('Site address', addressInput || 'Not provided')
     body.append('Est. miles', miles !== null ? miles + ' miles' : 'Not calculated')
     body.append('Power on site', power)
@@ -182,8 +233,8 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
   mileageChargeLabel, installTotalLabel, width, depth, miles, addressInput,
   baseLabel, notices, custName }) {
 
-  const tierColor = sc.total >= 40 ? 'tier-best' : sc.total >= 30 ? 'tier-good' : sc.total >= 20 ? 'tier-mid' : 'tier-base'
   const tierLabel = sc.total <= 19 ? '1–19' : sc.total <= 29 ? '20–29' : sc.total <= 39 ? '30–39' : '40+'
+  const tierColor = sc.total >= 40 ? 'tier-best' : sc.total >= 30 ? 'tier-good' : sc.total >= 20 ? 'tier-mid' : 'tier-base'
 
   const mileageRow = addressInput ? `
     <div class="result-meta-row">
@@ -198,12 +249,12 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
       <p class="price-box-note">75+ miles — contact us for a quote including travel</p>
     </div>` : `
     <div class="price-box price-box--install">
-      <p class="price-box-label">Supply &amp; Install${mileageTier.charge > 0 ? ' (inc travel)' : ''}</p>
+      <p class="price-box-label">Supply &amp; Install${mileageTier.chargeInc > 0 ? ' (inc travel)' : ''}</p>
       <p class="price-box-amount">${fmt(installTotal)}</p>
-      ${mileageTier.charge > 0
+      ${mileageTier.chargeInc > 0
         ? `<div class="mileage-breakdown">
             <div class="mileage-line"><span>${sc.total} screws × ${fmt(tier.installedInc)}</span><span>${fmt(installBase)}</span></div>
-            <div class="mileage-line mileage-surcharge"><span>Travel (${mileageTier.label})</span><span>+ ${fmt(mileageTier.charge)}</span></div>
+            <div class="mileage-line mileage-surcharge"><span>Travel (${mileageTier.label})</span><span>+ ${fmt(mileageTier.chargeInc)}</span></div>
            </div>`
         : `<p class="price-box-note">inc VAT · ${fmt(tier.installedInc)} per screw · travel FREE</p>`}
     </div>`
@@ -217,7 +268,7 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
         <div>
           <p class="result-label">Hi ${custName.split(' ')[0]} — your estimate</p>
           <p class="result-big-num">${sc.total}</p>
-          <p class="result-sub">${sc.rows} rows × ${sc.cols} wide · ${width}m × ${depth}m · ${baseLabel}</p>
+          <p class="result-sub">${sc.rows} rows × ${sc.cols} wide · ${width}m × ${depth}m · ${baseLabel} · ${selectedScrewLength} screws</p>
         </div>
         <span class="tier-badge ${tierColor}">${tierLabel} screws · ${fmt(tier.installedInc)}/ea</span>
       </div>
@@ -241,7 +292,7 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
 
       ${notices.length ? `<div class="result-notices">${noticesHtml}</div>` : ''}
 
-      <p class="result-disclaimer">Estimate based on standard 1.25m screws at domestic rates. Final quote confirmed within 1 working day.</p>
+      <p class="result-disclaimer">Estimate based on ${selectedScrewLength} screws at domestic rates inc VAT. Final quote confirmed within 1 working day.</p>
       <a href="contact.html" class="btn btn-primary btn-lg result-cta">Request a Formal Quote</a>
     </div>
   `
@@ -251,21 +302,23 @@ function renderResult({ sc, tier, supplyTotal, installBase, installTotal, mileag
 
 function resetCalc() {
   selectedBase = null
+  selectedScrewLength = '1.25m'
   document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.screw-btn').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
   document.getElementById('spacing-hint').style.display = 'none'
   ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode', 'cust-name', 'cust-email'].forEach(id => {
     document.getElementById(id).value = ''
   })
   document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false)
-  document.getElementById('result-panel').innerHTML = `
-    <div class="result-empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      <p>Fill in the steps on the left and press <strong>Get My Price Estimate</strong> to see your quote.</p>
-    </div>`
+  clearResult()
   document.getElementById('calc-error').style.display = 'none'
+  updatePricingTable()
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.screw-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectScrewLength(btn.dataset.screw))
+  })
   document.querySelectorAll('.base-btn').forEach(btn => {
     btn.addEventListener('click', () => selectBase(btn.dataset.base))
   })
@@ -281,4 +334,5 @@ document.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('calculate-btn').addEventListener('click', handleSubmit)
   document.getElementById('reset-btn').addEventListener('click', resetCalc)
+  updatePricingTable()
 })

@@ -40,7 +40,7 @@
       grid-template-columns: repeat(2, 1fr);
       gap: .75rem;
     }
-    .base-btn {
+    .base-btn, .screw-btn {
       padding: .9rem 1rem;
       border-radius: var(--radius);
       border: 2px solid var(--grey-200);
@@ -54,23 +54,23 @@
       text-align: center;
       line-height: 1.4;
     }
-    .base-btn small {
+    .base-btn small, .screw-btn small {
       display: block;
       font-size: .7rem;
       font-weight: 600;
       color: var(--grey-400);
       margin-top: .2rem;
     }
-    .base-btn:hover {
+    .base-btn:hover, .screw-btn:hover {
       border-color: var(--green-500);
       color: var(--green-700);
     }
-    .base-btn.active {
+    .base-btn.active, .screw-btn.active {
       border-color: var(--green-500);
       background: rgba(58,103,176,.06);
       color: var(--green-700);
     }
-    .base-btn.active small { color: var(--green-500); }
+    .base-btn.active small, .screw-btn.active small { color: var(--green-500); }
     #spacing-hint {
       font-size: var(--fs-xs);
       color: var(--grey-500);
@@ -462,9 +462,21 @@
           <a href="calculator-trade.html">Click here for trade pricing &rarr;</a>
         </div>
 
-        <!-- Step 1: Base type -->
+        <!-- Step 1: Screw length -->
         <div class="calc-card">
-          <h3>1. Select Base Type</h3>
+          <h3>1. Screw Length</h3>
+          <p>Select the screw length for your project. 1.25m is standard for most garden room foundations.</p>
+          <div class="base-grid">
+            <button class="screw-btn" data-screw="1m">1m</button>
+            <button class="screw-btn active" data-screw="1.25m">1.25m <small>Standard</small></button>
+            <button class="screw-btn" data-screw="1.5m">1.5m</button>
+            <button class="screw-btn" data-screw="2m">2m</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Base type -->
+        <div class="calc-card">
+          <h3>2. Select Base Type</h3>
           <p>Choosing your base type pre-fills the recommended maximum screw spacing — you can adjust below if needed.</p>
           <div class="base-grid">
             <button class="base-btn" data-base="sips">SIPs Base<small>Max 1.22m × 1.5m</small></button>
@@ -475,9 +487,9 @@
           <p id="spacing-hint" style="display:none;"></p>
         </div>
 
-        <!-- Step 2: Dimensions -->
+        <!-- Step 3: Dimensions -->
         <div class="calc-card">
-          <h3>2. Garden Room Dimensions</h3>
+          <h3>3. Garden Room Dimensions</h3>
           <p>Enter the overall footprint of your garden room in metres.</p>
           <div class="form-grid-2">
             <div class="form-group">
@@ -491,9 +503,9 @@
           </div>
         </div>
 
-        <!-- Step 3: Spacing override -->
+        <!-- Step 4: Spacing override -->
         <div class="calc-card">
-          <h3>3. Max Screw Spacing</h3>
+          <h3>4. Max Screw Spacing</h3>
           <p>Auto-filled from your base type selection. Edit here if you need a custom spacing.</p>
           <div class="form-grid-2">
             <div class="form-group">
@@ -507,9 +519,9 @@
           </div>
         </div>
 
-        <!-- Step 4: Site details -->
+        <!-- Step 5: Site details -->
         <div class="calc-card">
-          <h3>4. Site Details</h3>
+          <h3>5. Site Details</h3>
           <div class="form-group" style="margin-bottom: 1.25rem;">
             <label for="postcode">Site Postcode or Address</label>
             <input type="text" id="postcode" placeholder="e.g. GU1 4RG or Guildford, Surrey" />
@@ -538,9 +550,9 @@
           </div>
         </div>
 
-        <!-- Step 5: Email gate -->
+        <!-- Step 6: Email gate -->
         <div class="calc-card">
-          <h3>5. Get Your Free Estimate</h3>
+          <h3>6. Get Your Free Estimate</h3>
           <p>Enter your details to see your price on-screen and receive a copy by email.</p>
           <div class="form-grid-2">
             <div class="form-group">
@@ -578,7 +590,7 @@
         <!-- Pricing reference -->
         <details class="calc-card" style="margin-top:1.25rem;cursor:pointer;">
           <summary style="font-size:var(--fs-sm);font-weight:700;color:var(--dark);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-            Pricing Reference (1.25m screws, domestic)
+            <span id="pricing-heading">Pricing Reference (1.25m screws, domestic inc VAT)</span>
             <svg style="width:16px;height:16px;color:var(--grey-400);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div style="margin-top:1rem;overflow-x:auto;">
@@ -590,12 +602,7 @@
                   <th style="padding:.5rem .75rem;text-align:right;font-weight:700;color:var(--grey-600);border:1px solid var(--grey-100);">Install (inc VAT)</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr><td style="padding:.5rem .75rem;border:1px solid var(--grey-100);font-weight:600;">1–19</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£39 / screw</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£90 / screw</td></tr>
-                <tr style="background:var(--grey-50);"><td style="padding:.5rem .75rem;border:1px solid var(--grey-100);font-weight:600;">20–29</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£35 / screw</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£84 / screw</td></tr>
-                <tr><td style="padding:.5rem .75rem;border:1px solid var(--grey-100);font-weight:600;">30–39</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£35 / screw</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£78 / screw</td></tr>
-                <tr style="background:var(--grey-50);"><td style="padding:.5rem .75rem;border:1px solid var(--grey-100);font-weight:600;">40+</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£35 / screw</td><td style="padding:.5rem .75rem;text-align:right;border:1px solid var(--grey-100);">£72 / screw</td></tr>
-              </tbody>
+              <tbody id="pricing-tbody"></tbody>
             </table>
             <p style="font-size:.65rem;color:var(--grey-400);margin-top:.6rem;">All prices inc VAT. Standard 1.25m screws. Trade pricing available — <a href="contact.html" style="color:var(--green-600);">contact us</a>.</p>
           </div>
@@ -616,8 +623,8 @@
                   <tr>
                     <td style="font-weight:700;">Supply &amp; Install</td>
                     <td class="free">FREE</td>
-                    <td>£75</td>
-                    <td>£150</td>
+                    <td>£90 inc VAT<br><small style="color:var(--grey-400);">£75 ex VAT</small></td>
+                    <td>£180 inc VAT<br><small style="color:var(--grey-400);">£150 ex VAT</small></td>
                     <td class="poa">POA</td>
                   </tr>
                 </tbody>
