@@ -321,10 +321,100 @@
     .result-empty svg { width: 48px; height: 48px; opacity: .3; margin: 0 auto 1rem; display: block; }
     .result-empty p { font-size: var(--fs-sm); }
 
+    /* ---- Screw length cards ---- */
+    .screw-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .75rem;
+      margin-top: .25rem;
+    }
+    .screw-card {
+      position: relative;
+      padding: 1.25rem 1rem 1rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--grey-200);
+      background: white;
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      width: 100%;
+    }
+    .screw-card:hover { border-color: var(--green-500); }
+    .screw-card.active {
+      border-color: var(--green-500);
+      background: rgba(34,80,150,.05);
+    }
+    .screw-card--featured.active {
+      background: #1a2f52;
+      border-color: #1a2f52;
+    }
+    .screw-card-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green-500);
+      color: white;
+      font-size: .6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: .2rem .65rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .screw-card-size {
+      font-family: var(--font-heading);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--dark);
+      line-height: 1;
+      margin-bottom: .3rem;
+      margin-top: .35rem;
+    }
+    .screw-card--featured.active .screw-card-size { color: #7ab4f5; }
+    .screw-card.active:not(.screw-card--featured) .screw-card-size { color: var(--green-700); }
+    .screw-card-label {
+      font-size: .58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--grey-500);
+      margin-bottom: .7rem;
+    }
+    .screw-card--featured.active .screw-card-label { color: rgba(255,255,255,.4); }
+    .screw-card-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+    }
+    .screw-card-list li {
+      font-size: .68rem;
+      color: var(--grey-600);
+      padding-left: 1rem;
+      position: relative;
+      text-align: left;
+      line-height: 1.35;
+    }
+    .screw-card-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--green-500);
+      font-size: .65rem;
+    }
+    .screw-card--featured.active .screw-card-list li { color: rgba(255,255,255,.65); }
+    .screw-card--featured.active .screw-card-list li::before { color: #7ab4f5; }
+
     @media (max-width: 900px) {
       .calc-layout { grid-template-columns: 1fr; }
       .calc-result-sticky { position: static; }
       .base-grid { grid-template-columns: repeat(2, 1fr); }
+      .screw-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 600px) {
       .calc-card { padding: 1.25rem; }
@@ -467,11 +557,48 @@
         <div class="calc-card">
           <h3>1. Screw Length</h3>
           <p>Select the screw length for your project. 1.25m is standard for most garden room foundations.</p>
-          <div class="base-grid">
-            <button class="screw-btn" data-screw="1m">1m<small>Shallow &amp; light</small></button>
-            <button class="screw-btn active" data-screw="1.25m">1.25m<small>Our standard</small></button>
-            <button class="screw-btn" data-screw="1.5m">1.5m<small>Deeper reach</small></button>
-            <button class="screw-btn" data-screw="2m">2m<small>Max depth</small></button>
+          <div class="screw-grid">
+            <button class="screw-card" data-screw="1m">
+              <div class="screw-card-size">1m</div>
+              <div class="screw-card-label">Shallow &amp; Light</div>
+              <ul class="screw-card-list">
+                <li>Lighter garden structures</li>
+                <li>Shallow topsoil</li>
+                <li>Low-load applications</li>
+                <li>Access-constrained sites</li>
+              </ul>
+            </button>
+            <button class="screw-card screw-card--featured active" data-screw="1.25m">
+              <span class="screw-card-badge">Most Common</span>
+              <div class="screw-card-size">1.25m</div>
+              <div class="screw-card-label">Our Standard</div>
+              <ul class="screw-card-list">
+                <li>Garden rooms &amp; annexes</li>
+                <li>All standard SE England soils</li>
+                <li>Most residential projects</li>
+                <li>Proven across 500+ installs</li>
+              </ul>
+            </button>
+            <button class="screw-card" data-screw="1.5m">
+              <div class="screw-card-size">1.5m</div>
+              <div class="screw-card-label">Deeper Reach</div>
+              <ul class="screw-card-list">
+                <li>Softer or wetter ground</li>
+                <li>Sloped sites</li>
+                <li>Heavier structures</li>
+                <li>Where 1.25m isn't sufficient</li>
+              </ul>
+            </button>
+            <button class="screw-card" data-screw="2m">
+              <div class="screw-card-size">2m</div>
+              <div class="screw-card-label">Maximum Depth</div>
+              <ul class="screw-card-list">
+                <li>Challenging ground conditions</li>
+                <li>Commercial projects</li>
+                <li>Large or multi-storey structures</li>
+                <li>Deep bearing layer required</li>
+              </ul>
+            </button>
           </div>
         </div>
 

@@ -93,7 +93,7 @@ function fmt(n) { return '£' + n.toFixed(0) }
 
 function selectScrewLength(len) {
   selectedScrewLength = len
-  document.querySelectorAll('.screw-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.screw === len))
+  document.querySelectorAll('[data-screw]').forEach(btn => btn.classList.toggle('active', btn.dataset.screw === len))
   clearResult()
   updatePricingTable()
 }
@@ -304,7 +304,7 @@ function resetCalc() {
   selectedBase = null
   selectedScrewLength = '1.25m'
   document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
-  document.querySelectorAll('.screw-btn').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
+  document.querySelectorAll('[data-screw]').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
   document.getElementById('spacing-hint').style.display = 'none'
   ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode', 'cust-name', 'cust-email'].forEach(id => {
     document.getElementById(id).value = ''
@@ -316,7 +316,7 @@ function resetCalc() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.screw-btn').forEach(btn => {
+  document.querySelectorAll('[data-screw]').forEach(btn => {
     btn.addEventListener('click', () => selectScrewLength(btn.dataset.screw))
   })
   document.querySelectorAll('.base-btn').forEach(btn => {
