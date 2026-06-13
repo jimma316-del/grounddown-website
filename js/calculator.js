@@ -253,15 +253,17 @@ async function handleSubmit() {
   const supplyTotalEx  = isTrade ? sc.total * tier.supplyEx : null
   const installBaseInc = sc.total * tier.installedInc
   const installBaseEx  = isTrade ? sc.total * tier.installedEx : null
-  const installTotalInc = mileageTier.poa ? null : installBaseInc + mileageTier.chargeInc
-  const installTotalEx  = (isTrade && !mileageTier.poa) ? installBaseEx + mileageTier.chargeEx : null
+  const generatorChargeEx  = power === 'no' ? 150 : 0
+  const generatorChargeInc = power === 'no' ? 180 : 0
+  const installTotalInc = mileageTier.poa ? null : installBaseInc + mileageTier.chargeInc + generatorChargeInc
+  const installTotalEx  = (isTrade && !mileageTier.poa) ? installBaseEx + mileageTier.chargeEx + generatorChargeEx : null
 
   const mileageChargeLabel = mileageTier.poa ? 'POA'
     : mileageTier.chargeInc === 0 ? 'FREE'
     : `${fmtInc(mileageTier.chargeInc)} inc VAT (${fmtInc(mileageTier.chargeEx)} ex VAT)`
 
   const notices = []
-  if (power  === 'no') notices.push('No power on site — a generator may be required.')
+  if (power  === 'no') notices.push('No power on site — generator hire added: £150 + VAT.')
   if (access === 'no') notices.push('Limited site access — please mention this in your enquiry.')
   if (marked === 'no') notices.push('Screw locations not marked — a marking-out service can be arranged.')
 
@@ -279,6 +281,7 @@ async function handleSubmit() {
     `Mileage: ${mileageTier.label}${miles !== null ? ` (~${miles} miles)` : ''} — ${mileageChargeLabel}`,
     addressInput ? `Site postcode: ${addressInput}` : null,
     `Power on site: ${power}`,
+    power === 'no' ? `Generator hire: £150 ex VAT / £180 inc VAT (added to install total)` : null,
     `Clear access: ${access}`,
     `Locations marked: ${marked}`,
   ].filter(Boolean).join('\n')
@@ -302,6 +305,7 @@ async function handleSubmit() {
     formBody.append('Site address',  addressInput || 'Not provided')
     formBody.append('Est. miles',    miles !== null ? miles + ' miles' : 'Not calculated')
     formBody.append('Power on site', power)
+    if (power === 'no') formBody.append('Generator hire', '£150 ex VAT / £180 inc VAT')
     formBody.append('Clear access',  access)
     formBody.append('Locations marked', marked)
     formBody.append('_replyto', contactEmail)
@@ -328,12 +332,14 @@ async function handleSubmit() {
 
   renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc, installBaseEx,
     installTotalInc, installTotalEx, mileageTier, mileageChargeLabel,
-    width, depth, miles, addressInput, baseLabel, notices, contactName })
+    width, depth, miles, addressInput, baseLabel, notices, contactName,
+    generatorChargeInc, generatorChargeEx })
 }
 
 function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc, installBaseEx,
   installTotalInc, installTotalEx, mileageTier, mileageChargeLabel,
-  width, depth, miles, addressInput, baseLabel, notices, contactName }) {
+  width, depth, miles, addressInput, baseLabel, notices, contactName,
+  generatorChargeInc = 0, generatorChargeEx = 0 }) {
 
   const isTrade = customerType === 'trade'
 
@@ -356,6 +362,12 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
        <p class="price-box-note">${fmtEx(tier.supplyEx)} ex VAT per screw</p>`
     : `<p class="price-box-note">inc VAT · ${fmtInc(tier.supplyInc)} per screw</p>`
 
+  const hasExtras = mileageTier.chargeInc > 0 || generatorChargeInc > 0
+  const installLabel = ['Supply &amp; Install',
+    mileageTier.chargeInc > 0 ? 'inc travel' : '',
+    generatorChargeInc > 0 ? 'inc generator' : ''
+  ].filter(Boolean).join(' · ').replace('Supply &amp; Install · ', 'Supply &amp; Install (') + (hasExtras ? ')' : '')
+
   const installBoxHtml = mileageTier.poa ? `
     <div class="price-box price-box--install poa-box">
       <p class="price-box-label">Supply &amp; Install</p>
@@ -363,19 +375,25 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
       <p class="price-box-note">75+ miles — contact us for a quote including travel</p>
     </div>` : `
     <div class="price-box price-box--install">
-      <p class="price-box-label">Supply &amp; Install${mileageTier.chargeInc > 0 ? ' (inc travel)' : ''}</p>
+      <p class="price-box-label">${installLabel}</p>
       <p class="price-box-amount">${fmtInc(installTotalInc)}</p>
       ${isTrade ? `<p class="price-box-note-ex">${fmtEx(installTotalEx)} ex VAT</p>` : ''}
-      ${mileageTier.chargeInc > 0
+      ${hasExtras
         ? `<div class="mileage-breakdown">
             <div class="mileage-line">
               <span>${sc.total} × ${isTrade ? fmtEx(tier.installedEx) + ' ex VAT' : fmtInc(tier.installedInc)}</span>
               <span>${isTrade ? fmtEx(installBaseEx) : fmtInc(installBaseInc)}</span>
             </div>
+            ${mileageTier.chargeInc > 0 ? `
             <div class="mileage-line mileage-surcharge">
               <span>Travel (${mileageTier.label})</span>
               <span>+ ${isTrade ? '£' + mileageTier.chargeEx + ' ex VAT' : fmtInc(mileageTier.chargeInc)}</span>
-            </div>
+            </div>` : ''}
+            ${generatorChargeInc > 0 ? `
+            <div class="mileage-line mileage-surcharge">
+              <span>Generator hire</span>
+              <span>+ ${isTrade ? '£' + generatorChargeEx + ' ex VAT' : fmtInc(generatorChargeInc)}</span>
+            </div>` : ''}
            </div>`
         : `<p class="price-box-note">${isTrade ? fmtEx(tier.installedEx) + ' ex VAT per screw' : fmtInc(tier.installedInc) + ' per screw'} · travel FREE</p>`}
     </div>`
