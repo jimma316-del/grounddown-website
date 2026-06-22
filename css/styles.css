@@ -2,7 +2,7 @@
    GROUND DOWN — Stylesheet
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+/* Google Fonts loaded via <link> in HTML for performance */
 
 /* ---- Custom Properties ---- */
 :root {
@@ -63,7 +63,7 @@
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
   font-family: var(--font);
   font-size: var(--fs-base);
