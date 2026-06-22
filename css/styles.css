@@ -63,7 +63,8 @@
 
 /* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html, body { overflow-x: hidden; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--font);
   font-size: var(--fs-base);
@@ -524,7 +525,6 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   gap: 8px;
   font-size: var(--fs-sm);
   font-weight: 600;
-  white-space: nowrap;
 }
 .trust-item svg { width: 18px; height: 18px; color: var(--amber-400); flex-shrink: 0; }
 .trust-div { width: 1px; height: 18px; background: rgba(255,255,255,.15); }
