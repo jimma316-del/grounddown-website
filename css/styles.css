@@ -663,7 +663,7 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   border: 3px solid var(--green-800);
   box-shadow: 0 0 0 5px rgba(255,255,255,.15);
 }
-.process-step h5, .process-step h4 { font-size: var(--fs-base); margin-bottom: .5rem; }
+.process-step h5, .process-step h4, .process-step h3 { font-size: var(--fs-base); margin-bottom: .5rem; }
 .process-step p  { font-size: var(--fs-xs);  color: var(--grey-500); line-height: 1.6; }
 .text-white .process-step h5 { color: white; }
 .text-white .process-step p  { color: rgba(255,255,255,.6); }
@@ -1024,7 +1024,7 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   justify-content: space-between;
   align-items: center;
   font-size: var(--fs-xs);
-  color: rgba(255,255,255,.30);
+  color: rgba(255,255,255,.55);
 }
 
 /* ---- UTILITY ---- */
