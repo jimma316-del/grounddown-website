@@ -812,7 +812,7 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   flex-shrink: 0;
 }
 .author-meta strong { display: block; font-size: var(--fs-sm); font-weight: 700; }
-.author-meta span   { font-size: var(--fs-xs); color: var(--grey-500); }
+.author-meta span   { font-size: var(--fs-xs); color: #4b5563; }
 
 /* ---- SCREW / SPLIT SECTIONS ---- */
 .split-grid {
@@ -1186,6 +1186,7 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
 .screw-card ul li::before { content: '→'; position: absolute; left: 0; color: var(--green-400); font-size: .8em; }
 .screw-card-featured ul li { color: rgba(255,255,255,.75); }
 .screw-card-featured ul li::before { color: var(--amber-400); }
+.screw-card-featured .screw-label { color: #b0bbc9; }
 .hero-content .hero-tagline { font-family: var(--font-heading); font-size: clamp(1.4rem, 2.5vw, 1.9rem); font-weight: 700; color: rgba(255,255,255,.92); margin-bottom: 1rem; line-height: 1.25; }
 .hero-price-anchor { color: rgba(255,255,255,.72); font-size: var(--fs-sm); margin-bottom: 1.75rem; }
 .hero-line-white { color: rgba(255,255,255,.95); }
