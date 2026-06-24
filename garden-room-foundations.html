@@ -13,8 +13,10 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preload" as="image" href="images/completed-foundation-membrane-lawn.jpg" media="(min-width: 769px)">
-    <link rel="preload" as="image" href="images/sm/completed-foundation-membrane-lawn.jpg" media="(max-width: 768px)">
+    <link rel="preload" as="image"
+          href="images/completed-foundation-membrane-lawn.jpg"
+          imagesrcset="images/sm/completed-foundation-membrane-lawn.jpg 600w, images/completed-foundation-membrane-lawn.jpg 1200w"
+          imagesizes="100vw">
   </head>
 <body>
 
@@ -102,7 +104,14 @@
 </div>
 
 <!-- PAGE HERO -->
-<section class="page-hero" style="background-image:url('images/completed-foundation-membrane-lawn.jpg')">
+<section class="page-hero">
+  <img class="hero-bg"
+       src="images/completed-foundation-membrane-lawn.jpg"
+       srcset="images/sm/completed-foundation-membrane-lawn.jpg 600w, images/completed-foundation-membrane-lawn.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       fetchpriority="high" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <div class="page-hero-inner">
       <span class="eyebrow">Specialist Expertise</span>
@@ -343,7 +352,14 @@
 </section>
 
 <!-- CTA -->
-<section class="cta-section" style="background-image:url('images/screws-installed-lawn-shadow.jpg')">
+<section class="cta-section">
+  <img class="hero-bg"
+       src="images/screws-installed-lawn-shadow.jpg"
+       srcset="images/sm/screws-installed-lawn-shadow.jpg 600w, images/screws-installed-lawn-shadow.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       loading="lazy" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <span class="eyebrow eyebrow-amber">Get Your Foundation Quote</span>
     <h2>Ready to Plan Your Garden Room Foundation?</h2>

@@ -13,8 +13,10 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preload" as="image" href="images/installer-hiviz-working.jpg" media="(min-width: 769px)">
-    <link rel="preload" as="image" href="images/sm/installer-hiviz-working.jpg" media="(max-width: 768px)">
+    <link rel="preload" as="image"
+          href="images/installer-hiviz-working.jpg"
+          imagesrcset="images/sm/installer-hiviz-working.jpg 600w, images/installer-hiviz-working.jpg 1200w"
+          imagesizes="100vw">
   </head>
 <body>
 
@@ -101,7 +103,14 @@
   </div>
 </div>
 
-<section class="page-hero" style="background-image:url('images/installer-hiviz-working.jpg')">
+<section class="page-hero">
+  <img class="hero-bg"
+       src="images/installer-hiviz-working.jpg"
+       srcset="images/sm/installer-hiviz-working.jpg 600w, images/installer-hiviz-working.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       fetchpriority="high" decoding="async"
+       width="1200" height="1600" />
   <div class="container">
     <div class="page-hero-inner">
       <span class="eyebrow">Get in Touch</span>

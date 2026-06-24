@@ -13,8 +13,10 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preload" as="image" href="images/machine-setup-lawn-tools.jpg" media="(min-width: 769px)">
-    <link rel="preload" as="image" href="images/sm/machine-setup-lawn-tools.jpg" media="(max-width: 768px)">
+    <link rel="preload" as="image"
+          href="images/machine-setup-lawn-tools.jpg"
+          imagesrcset="images/sm/machine-setup-lawn-tools.jpg 600w, images/machine-setup-lawn-tools.jpg 1200w"
+          imagesizes="100vw">
   </head>
 <body>
 
@@ -102,7 +104,14 @@
 </div>
 
 <!-- PAGE HERO -->
-<section class="page-hero" style="background-image:url('images/machine-setup-lawn-tools.jpg')">
+<section class="page-hero">
+  <img class="hero-bg"
+       src="images/machine-setup-lawn-tools.jpg"
+       srcset="images/sm/machine-setup-lawn-tools.jpg 600w, images/machine-setup-lawn-tools.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       fetchpriority="high" decoding="async"
+       width="1200" height="1599" />
   <div class="container">
     <div class="page-hero-inner">
       <span class="eyebrow">Additional Service</span>
@@ -327,7 +336,14 @@
 </section>
 
 <!-- CTA -->
-<section class="cta-section" style="background-image:url('images/screws-installed-lawn-shadow.jpg')">
+<section class="cta-section">
+  <img class="hero-bg"
+       src="images/screws-installed-lawn-shadow.jpg"
+       srcset="images/sm/screws-installed-lawn-shadow.jpg 600w, images/screws-installed-lawn-shadow.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       loading="lazy" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <span class="eyebrow eyebrow-amber">Need Load Testing?</span>
     <h2>Get in Touch to Discuss Your Project</h2>

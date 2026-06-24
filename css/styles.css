@@ -414,9 +414,6 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
 .hero {
   position: relative;
   background-color: var(--dark);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   color: white;
   padding: 160px 0 140px;
   overflow: hidden;
@@ -425,13 +422,23 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(110deg, rgba(5,10,18,0.84) 0%, rgba(5,10,18,0.62) 55%, rgba(5,10,18,0.38) 100%);
   pointer-events: none;
 }
 .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 720px;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
 }
 .hero-content h1 { color: white; margin-bottom: 1.25rem; }
 .hero-content p  { color: rgba(255,255,255,.88); font-size: var(--fs-lg); line-height: 1.72; margin-bottom: 2.25rem; }
@@ -489,9 +496,6 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
 .page-hero {
   position: relative;
   background-color: var(--dark);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   color: white;
   padding: 110px 0 90px;
   overflow: hidden;
@@ -500,10 +504,11 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(110deg, rgba(5,10,18,0.86) 0%, rgba(5,10,18,0.68) 100%);
   pointer-events: none;
 }
-.page-hero-inner { position: relative; z-index: 1; }
+.page-hero-inner { position: relative; z-index: 2; }
 .page-hero h1   { color: white; margin-bottom: 1rem; }
 .page-hero p    { color: rgba(255,255,255,.84); font-size: var(--fs-xl); max-width: 620px; }
 
@@ -859,9 +864,6 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
 .cta-section {
   position: relative;
   background-color: var(--dark);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   color: white;
   text-align: center;
   padding: 110px 0;
@@ -871,10 +873,11 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: rgba(5,10,18,0.80);
   pointer-events: none;
 }
-.cta-section .container { position: relative; z-index: 1; }
+.cta-section .container { position: relative; z-index: 2; }
 .cta-section h2   { color: white; margin-bottom: .9rem; }
 .cta-section p    { color: rgba(255,255,255,.82); font-size: var(--fs-xl); max-width: 580px; margin: 0 auto 2.5rem; }
 
@@ -1061,8 +1064,8 @@ h5 { font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 800; }
   :root { --section: 56px; --section-sm: 44px; }
   .nav-links, .nav-right { display: none; }
   .nav-burger { display: flex; }
-  .hero { padding: 100px 0 80px; background-position: top center; }
-  .page-hero { background-position: center top; }
+  .hero { padding: 100px 0 80px; }
+  .hero .hero-bg, .page-hero .hero-bg { object-position: top center; }
   .split-grid { grid-template-columns: 1fr; }
   .split-grid .img-placeholder-light,
   .split-grid .site-photo { display: none; }

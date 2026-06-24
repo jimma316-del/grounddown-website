@@ -13,8 +13,10 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preload" as="image" href="images/installer-installing-row.jpg" media="(min-width: 769px)">
-    <link rel="preload" as="image" href="images/sm/installer-installing-row.jpg" media="(max-width: 768px)">
+    <link rel="preload" as="image"
+          href="images/installer-installing-row.jpg"
+          imagesrcset="images/sm/installer-installing-row.jpg 600w, images/installer-installing-row.jpg 1200w"
+          imagesizes="100vw">
   </head>
 <body>
 
@@ -105,7 +107,14 @@
 </div>
 
 <!-- PAGE HERO -->
-<section class="page-hero" style="background-image:url('images/installer-installing-row.jpg')">
+<section class="page-hero">
+  <img class="hero-bg"
+       src="images/installer-installing-row.jpg"
+       srcset="images/sm/installer-installing-row.jpg 600w, images/installer-installing-row.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       fetchpriority="high" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <div class="page-hero-inner">
       <span class="eyebrow">Our Primary Service</span>
@@ -406,7 +415,14 @@
 </section>
 
 <!-- CTA -->
-<section class="cta-section" style="background-image:url('images/screws-installed-lawn-shadow.jpg')">
+<section class="cta-section">
+  <img class="hero-bg"
+       src="images/screws-installed-lawn-shadow.jpg"
+       srcset="images/sm/screws-installed-lawn-shadow.jpg 600w, images/screws-installed-lawn-shadow.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       loading="lazy" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <span class="eyebrow eyebrow-amber">Get Started Today</span>
     <h2>Request a Quote for Supply &amp; Installation</h2>

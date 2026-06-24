@@ -13,8 +13,10 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preload" as="image" href="images/screws-grid-sunny-lawn.jpg" media="(min-width: 769px)">
-    <link rel="preload" as="image" href="images/sm/screws-grid-sunny-lawn.jpg" media="(max-width: 768px)">
+    <link rel="preload" as="image"
+          href="images/screws-grid-sunny-lawn.jpg"
+          imagesrcset="images/sm/screws-grid-sunny-lawn.jpg 600w, images/screws-grid-sunny-lawn.jpg 1200w"
+          imagesizes="100vw">
   </head>
 <body>
 
@@ -102,7 +104,14 @@
 </div>
 
 <!-- PAGE HERO -->
-<section class="page-hero" style="background-image:url('images/screws-grid-sunny-lawn.jpg')">
+<section class="page-hero">
+  <img class="hero-bg"
+       src="images/screws-grid-sunny-lawn.jpg"
+       srcset="images/sm/screws-grid-sunny-lawn.jpg 600w, images/screws-grid-sunny-lawn.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       fetchpriority="high" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <div class="page-hero-inner">
       <span class="eyebrow">Ground Screw Knowledge</span>
@@ -121,7 +130,14 @@
 </section>
 
 <!-- CTA -->
-<section class="cta-section" style="background-image:url('images/screws-installed-lawn-shadow.jpg')">
+<section class="cta-section">
+  <img class="hero-bg"
+       src="images/screws-installed-lawn-shadow.jpg"
+       srcset="images/sm/screws-installed-lawn-shadow.jpg 600w, images/screws-installed-lawn-shadow.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       loading="lazy" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <span class="eyebrow eyebrow-amber">Ready to Get Started?</span>
     <h2>Get an Instant Price Estimate</h2>

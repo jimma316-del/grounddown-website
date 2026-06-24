@@ -13,8 +13,10 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preload" as="image" href="images/screws-field-wide-project.jpg" media="(min-width: 769px)">
-    <link rel="preload" as="image" href="images/sm/screws-field-wide-project.jpg" media="(max-width: 768px)">
+    <link rel="preload" as="image"
+          href="images/screws-field-wide-project.jpg"
+          imagesrcset="images/sm/screws-field-wide-project.jpg 600w, images/screws-field-wide-project.jpg 1200w"
+          imagesizes="100vw">
   </head>
 <body>
 
@@ -107,7 +109,14 @@
 </div>
 
 <!-- ====== HERO ====== -->
-<section class="hero" style="background-image:url('images/screws-field-wide-project.jpg')">
+<section class="hero">
+  <img class="hero-bg"
+       src="images/screws-field-wide-project.jpg"
+       srcset="images/sm/screws-field-wide-project.jpg 600w, images/screws-field-wide-project.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       fetchpriority="high" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <div class="hero-content">
       <span class="eyebrow">South East England · 500+ Installations</span>
@@ -448,7 +457,14 @@
 </section>
 
 <!-- ====== FINAL CTA ====== -->
-<section class="cta-section" style="background-image:url('images/screws-installed-lawn-shadow.jpg')">
+<section class="cta-section">
+  <img class="hero-bg"
+       src="images/screws-installed-lawn-shadow.jpg"
+       srcset="images/sm/screws-installed-lawn-shadow.jpg 600w, images/screws-installed-lawn-shadow.jpg 1200w"
+       sizes="100vw"
+       alt=""
+       loading="lazy" decoding="async"
+       width="1200" height="900" />
   <div class="container">
     <span class="eyebrow eyebrow-amber">Ready to Get Started?</span>
     <h2>Get an Instant Price Estimate</h2>
