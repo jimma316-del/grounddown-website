@@ -99,15 +99,38 @@ function haversineMiles(lat1, lng1, lat2, lng2) {
 }
 
 async function geocodeAddress(address) {
+  const clean = address.trim()
+
+  // Try postcodes.io first — fast, reliable, no auth needed
+  const postcodeMatch = clean.match(/^[A-Z]{1,2}[0-9][0-9A-Z]?\s*[0-9][A-Z]{2}$/i)
+  if (postcodeMatch) {
+    try {
+      const resp = await fetch(
+        `https://api.postcodes.io/postcodes/${encodeURIComponent(clean.replace(/\s+/g, ''))}`,
+        { signal: AbortSignal.timeout(5000) }
+      )
+      if (resp.ok) {
+        const data = await resp.json()
+        if (data.status === 200 && data.result) {
+          return { lat: data.result.latitude, lng: data.result.longitude }
+        }
+      }
+    } catch {}
+  }
+
+  // Fall back to Nominatim for full addresses
   try {
-    const q = encodeURIComponent(address.trim() + ', UK')
+    const q = encodeURIComponent(clean + ', UK')
     const resp = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=gb`,
-      { headers: { 'User-Agent': 'GroundDownPriceCalculator/1.0 (grounddown.co.uk)' } }
+      { signal: AbortSignal.timeout(5000) }
     )
     const data = await resp.json()
-    if (data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
+    if (Array.isArray(data) && data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
+    }
   } catch {}
+
   return null
 }
 
@@ -330,15 +353,21 @@ async function handleSubmit() {
   btn.textContent = 'Get My Estimate'
   btn.disabled = false
 
-  renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc, installBaseEx,
-    installTotalInc, installTotalEx, mileageTier, mileageChargeLabel,
-    width, depth, miles, addressInput, baseLabel, notices, contactName,
-    generatorChargeInc, generatorChargeEx })
+  try {
+    renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc, installBaseEx,
+      installTotalInc, installTotalEx, mileageTier, mileageChargeLabel,
+      width, depth, miles, addressInput, baseLabel, notices, contactName, bizContactName,
+      generatorChargeInc, generatorChargeEx })
+  } catch (e) {
+    console.error('Calculator render error:', e)
+    errorEl.textContent = 'Something went wrong displaying your estimate. Please try again or call us on 07840 092397.'
+    errorEl.style.display = 'block'
+  }
 }
 
 function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc, installBaseEx,
   installTotalInc, installTotalEx, mileageTier, mileageChargeLabel,
-  width, depth, miles, addressInput, baseLabel, notices, contactName,
+  width, depth, miles, addressInput, baseLabel, notices, contactName, bizContactName = '',
   generatorChargeInc = 0, generatorChargeEx = 0 }) {
 
   const isTrade = customerType === 'trade'
