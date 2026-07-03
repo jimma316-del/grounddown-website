@@ -65,6 +65,7 @@ const BASE_CONFIGS = {
 }
 
 const INSET  = 0.1
+const FLANGE = 0.2
 const GD_LAT = 51.392
 const GD_LNG = -0.530
 
@@ -76,9 +77,10 @@ function calcScrews(width, depth, swid, sdep) {
   if (swid <= 0 || sdep <= 0 || width <= 0.2 || depth <= 0.2) return null
   const cols = Math.ceil((width - 2 * INSET) / swid) + 1
   const rows = Math.ceil((depth - 2 * INSET) / sdep) + 1
-  const ew = width - 2 * INSET
-  const ed = depth - 2 * INSET
-  return { cols, rows, total: cols * rows, widthSpan: ew / (cols - 1), depthSpan: ed / (rows - 1) }
+  // Clear span = total width minus all flange diameters, divided by gaps between screws
+  const widthSpan = cols > 1 ? (width - cols * FLANGE) / (cols - 1) : 0
+  const depthSpan = rows > 1 ? (depth - rows * FLANGE) / (rows - 1) : 0
+  return { cols, rows, total: cols * rows, widthSpan, depthSpan }
 }
 
 function getPricing(qty) {
@@ -458,7 +460,7 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
       <div class="result-meta">
         <div class="result-meta-row">
           <svg class="res-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          <span>Width span: <strong>${sc.widthSpan.toFixed(3)}m</strong> · Depth span: <strong>${sc.depthSpan.toFixed(3)}m</strong></span>
+          <span>Clear span (W): <strong>${sc.widthSpan.toFixed(3)}m</strong> · Clear span (D): <strong>${sc.depthSpan.toFixed(3)}m</strong></span>
         </div>
         ${mileageRow}
       </div>
