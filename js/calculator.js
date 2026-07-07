@@ -470,8 +470,8 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
 
   const displayName = isTrade ? bizContactName.split(' ')[0] : contactName.split(' ')[0]
   const disclaimer  = isTrade
-    ? `Trade estimate — ${selectedScrewLength} screws. Formal quote confirmed within 1 working day. Trade accounts available on request.`
-    : `Estimate based on ${selectedScrewLength} screws at domestic rates inc VAT. Final quote confirmed within 1 working day.`
+    ? `Trade estimate — ${selectedScrewLength} screws. We'll be in touch within the hour to confirm. Trade accounts available on request.`
+    : `Estimate based on ${selectedScrewLength} screws at domestic rates inc VAT. We'll confirm within the hour.`
 
   document.getElementById('calc-result-panel').innerHTML = `
     <div class="result-card">
@@ -507,8 +507,8 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
       <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:.75rem;">
         <svg style="width:20px;height:20px;color:#16a34a;flex-shrink:0;margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         <div>
-          <p style="font-weight:700;color:#15803d;margin:0 0 .25rem;">We've received your details</p>
-          <p style="color:#166534;font-size:.85rem;margin:0;">We'll be in touch within 1 working day to confirm your quote. Check your email or phone — we'll usually be quicker than that.</p>
+          <p style="font-weight:700;color:#15803d;margin:0 0 .25rem;">We'll be in touch within the hour</p>
+          <p style="color:#166534;font-size:.85rem;margin:0;">Keep an eye on your inbox — just reply to the email to get booked in or ask any questions.</p>
         </div>
       </div>
       <div class="result-actions">
