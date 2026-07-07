@@ -341,7 +341,7 @@ async function handleSubmit() {
     fetch(FORMSPREE_URL, { method: 'POST', body: formBody, headers: { Accept: 'application/json' } })
   } catch {}
 
-  // Add to CRM as a new lead
+  // Add to CRM as a new lead and trigger estimate email
   try {
     fetch(CRM_API_URL, {
       method: 'POST',
@@ -350,8 +350,34 @@ async function handleSubmit() {
         name:         isTrade ? bizContactName : contactName,
         email:        contactEmail || null,
         phone:        contactPhone || null,
+        company:      isTrade ? contactName : null,
         site_address: addressInput || (isTrade && bizAddress ? bizAddress : null),
         job_details:  jobDetails,
+        email_data: {
+          is_trade:           isTrade,
+          screw_count:        sc.total,
+          screw_rows:         sc.rows,
+          screw_cols:         sc.cols,
+          screw_length:       selectedScrewLength,
+          width, depth,
+          base_label:         baseLabel,
+          supply_inc:         supplyTotalInc,
+          supply_ex:          supplyTotalEx,
+          install_inc:        installTotalInc,
+          install_ex:         installTotalEx,
+          install_base_inc:   installBaseInc,
+          install_base_ex:    installBaseEx,
+          mileage_label:      mileageTier.label,
+          mileage_charge_inc: mileageTier.chargeInc,
+          mileage_charge_ex:  mileageTier.chargeEx,
+          generator_inc:      generatorChargeInc,
+          generator_ex:       generatorChargeEx,
+          set_out_inc:        setOutChargeInc,
+          set_out_ex:         setOutChargeEx,
+          poa:                mileageTier.poa,
+          power, access, marked,
+          miles,
+        },
       }),
     })
   } catch {}
