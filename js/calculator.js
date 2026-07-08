@@ -278,8 +278,8 @@ async function handleSubmit() {
   const supplyTotalEx  = isTrade ? sc.total * tier.supplyEx : null
   const installBaseInc = sc.total * tier.installedInc
   const installBaseEx  = isTrade ? sc.total * tier.installedEx : null
-  const generatorChargeEx  = power === 'no' ? 150 : 0
-  const generatorChargeInc = power === 'no' ? 180 : 0
+  const generatorChargeEx  = power === 'no' ? 80 : 0
+  const generatorChargeInc = power === 'no' ? 96 : 0
   const setOutChargeEx  = marked === 'no' ? 75 : 0
   const setOutChargeInc = marked === 'no' ? 90 : 0
   const installTotalInc = mileageTier.poa ? null : installBaseInc + mileageTier.chargeInc + generatorChargeInc + setOutChargeInc
@@ -290,7 +290,7 @@ async function handleSubmit() {
     : `${fmtInc(mileageTier.chargeInc)} inc VAT (${fmtInc(mileageTier.chargeEx)} ex VAT)`
 
   const notices = []
-  if (power  === 'no') notices.push('No power on site — generator hire added: £150 + VAT.')
+  if (power  === 'no') notices.push('No power on site — generator hire added: £80 + VAT.')
   if (access === 'no') notices.push('Limited site access — please mention this in your enquiry.')
   if (marked === 'no') notices.push('Screw positions not marked — scaled plan drawings & set-out service added: £75 + VAT.')
 
@@ -308,7 +308,7 @@ async function handleSubmit() {
     `Mileage: ${mileageTier.label}${miles !== null ? ` (~${miles} miles)` : ''} — ${mileageChargeLabel}`,
     addressInput ? `Site postcode: ${addressInput}` : null,
     `Power on site: ${power}`,
-    power === 'no' ? `Generator hire: £150 ex VAT / £180 inc VAT (added to install total)` : null,
+    power === 'no' ? `Generator hire: £80 ex VAT / £96 inc VAT (added to install total)` : null,
     `Clear access: ${access}`,
     `Locations marked: ${marked}`,
     marked === 'no' ? `Plan drawings & set-out: £75 ex VAT / £90 inc VAT (added to install total)` : null,
@@ -333,7 +333,7 @@ async function handleSubmit() {
     formBody.append('Site address',  addressInput || 'Not provided')
     formBody.append('Est. miles',    miles !== null ? miles + ' miles' : 'Not calculated')
     formBody.append('Power on site', power)
-    if (power === 'no') formBody.append('Generator hire', '£150 ex VAT / £180 inc VAT')
+    if (power === 'no') formBody.append('Generator hire', '£80 ex VAT / £96 inc VAT')
     formBody.append('Clear access',  access)
     formBody.append('Locations marked', marked)
     if (marked === 'no') formBody.append('Plan drawings & set-out', '£75 ex VAT / £90 inc VAT')
