@@ -57,11 +57,11 @@ const MILEAGE = [
 ]
 
 const BASE_CONFIGS = {
-  sips:   { label:'SIPs Base',             widthSpacing:1.12, depthSpacing:1.4 },
-  '4x2':  { label:'4"×2" Base',           widthSpacing:1.1,  depthSpacing:1.1 },
-  '5x2':  { label:'5"×2" Base',           widthSpacing:1.4,  depthSpacing:1.4 },
-  '6x2':  { label:'6"×2" Base',           widthSpacing:1.7,  depthSpacing:1.7 },
-  unsure: { label:'Standard (1.1m × 1.1m)', widthSpacing:1.1, depthSpacing:1.1 },
+  sips:   { label:'SIPs Base',             widthSpacing:1.22, depthSpacing:1.5 },
+  '4x2':  { label:'4"×2" Base',           widthSpacing:1.2,  depthSpacing:1.2 },
+  '5x2':  { label:'5"×2" Base',           widthSpacing:1.5,  depthSpacing:1.5 },
+  '6x2':  { label:'6"×2" Base',           widthSpacing:1.8,  depthSpacing:1.8 },
+  unsure: { label:'Standard (1.2m × 1.2m)', widthSpacing:1.2, depthSpacing:1.2 },
 }
 
 const INSET  = 0.1
