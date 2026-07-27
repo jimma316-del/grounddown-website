@@ -282,14 +282,17 @@ async function handleSubmit() {
   const generatorChargeInc = power === 'no' ? 96 : 0
   const setOutChargeEx  = marked === 'no' ? 75 : 0
   const setOutChargeInc = marked === 'no' ? 90 : 0
-  const installTotalInc = mileageTier.poa ? null : installBaseInc + mileageTier.chargeInc + generatorChargeInc + setOutChargeInc
-  const installTotalEx  = (isTrade && !mileageTier.poa) ? installBaseEx + mileageTier.chargeEx + generatorChargeEx + setOutChargeEx : null
+  const setupCostEx  = sc.total < 6 ? 140 : sc.total <= 10 ? 70 : 0
+  const setupCostInc = sc.total < 6 ? 168 : sc.total <= 10 ? 84 : 0
+  const installTotalInc = mileageTier.poa ? null : installBaseInc + mileageTier.chargeInc + generatorChargeInc + setOutChargeInc + setupCostInc
+  const installTotalEx  = (isTrade && !mileageTier.poa) ? installBaseEx + mileageTier.chargeEx + generatorChargeEx + setOutChargeEx + setupCostEx : null
 
   const mileageChargeLabel = mileageTier.poa ? 'POA'
     : mileageTier.chargeInc === 0 ? 'FREE'
     : `${fmtInc(mileageTier.chargeInc)} inc VAT (${fmtInc(mileageTier.chargeEx)} ex VAT)`
 
   const notices = []
+  if (setupCostInc > 0) notices.push(`Setup cost added: £${setupCostEx} + VAT (${sc.total < 6 ? 'fewer than 6' : '6–10'} screws).`)
   if (power  === 'no') notices.push('No power on site — generator hire added: £80 + VAT.')
   if (access === 'no') notices.push('Limited site access — please mention this in your enquiry.')
   if (marked === 'no') notices.push('Screw positions not marked — scaled plan drawings & set-out service added: £75 + VAT.')
@@ -312,6 +315,7 @@ async function handleSubmit() {
     `Clear access: ${access}`,
     `Locations marked: ${marked}`,
     marked === 'no' ? `Plan drawings & set-out: £75 ex VAT / £90 inc VAT (added to install total)` : null,
+    setupCostInc > 0 ? `Setup cost: £${setupCostEx} ex VAT / £${setupCostInc} inc VAT (added to install total)` : null,
   ].filter(Boolean).join('\n')
 
   try {
@@ -337,6 +341,7 @@ async function handleSubmit() {
     formBody.append('Clear access',  access)
     formBody.append('Locations marked', marked)
     if (marked === 'no') formBody.append('Plan drawings & set-out', '£75 ex VAT / £90 inc VAT')
+    if (setupCostInc > 0) formBody.append('Setup cost', `£${setupCostEx} ex VAT / £${setupCostInc} inc VAT`)
     formBody.append('_replyto', contactEmail)
     fetch(FORMSPREE_URL, { method: 'POST', body: formBody, headers: { Accept: 'application/json' } })
   } catch {}
@@ -374,6 +379,8 @@ async function handleSubmit() {
           generator_ex:       generatorChargeEx,
           set_out_inc:        setOutChargeInc,
           set_out_ex:         setOutChargeEx,
+          setup_cost_inc:     setupCostInc,
+          setup_cost_ex:      setupCostEx,
           poa:                mileageTier.poa,
           power, access, marked,
           miles,
@@ -389,7 +396,7 @@ async function handleSubmit() {
     renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc, installBaseEx,
       installTotalInc, installTotalEx, mileageTier, mileageChargeLabel,
       width, depth, miles, addressInput, baseLabel, notices, contactName, bizContactName,
-      generatorChargeInc, generatorChargeEx, setOutChargeInc, setOutChargeEx })
+      generatorChargeInc, generatorChargeEx, setOutChargeInc, setOutChargeEx, setupCostInc, setupCostEx })
   } catch (e) {
     console.error('Calculator render error:', e)
     errorEl.textContent = 'Something went wrong displaying your estimate. Please try again or call us on 07840 092397.'
@@ -400,7 +407,8 @@ async function handleSubmit() {
 function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc, installBaseEx,
   installTotalInc, installTotalEx, mileageTier, mileageChargeLabel,
   width, depth, miles, addressInput, baseLabel, notices, contactName, bizContactName = '',
-  generatorChargeInc = 0, generatorChargeEx = 0, setOutChargeInc = 0, setOutChargeEx = 0 }) {
+  generatorChargeInc = 0, generatorChargeEx = 0, setOutChargeInc = 0, setOutChargeEx = 0,
+  setupCostInc = 0, setupCostEx = 0 }) {
 
   const isTrade = customerType === 'trade'
 
@@ -423,11 +431,12 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
        <p class="price-box-note">${fmtEx(tier.supplyEx)} ex VAT per screw</p>`
     : `<p class="price-box-note">inc VAT · ${fmtInc(tier.supplyInc)} per screw</p>`
 
-  const hasExtras = mileageTier.chargeInc > 0 || generatorChargeInc > 0 || setOutChargeInc > 0
+  const hasExtras = mileageTier.chargeInc > 0 || generatorChargeInc > 0 || setOutChargeInc > 0 || setupCostInc > 0
   const installLabel = ['Supply &amp; Install',
     mileageTier.chargeInc > 0 ? 'inc travel' : '',
     generatorChargeInc > 0 ? 'inc generator' : '',
-    setOutChargeInc > 0 ? 'inc plan &amp; set-out' : ''
+    setOutChargeInc > 0 ? 'inc plan &amp; set-out' : '',
+    setupCostInc > 0 ? 'inc setup' : ''
   ].filter(Boolean).join(' · ').replace('Supply &amp; Install · ', 'Supply &amp; Install (') + (hasExtras ? ')' : '')
 
   const installBoxHtml = mileageTier.poa ? `
@@ -460,6 +469,11 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
             <div class="mileage-line mileage-surcharge">
               <span>Plan drawings &amp; set-out</span>
               <span>+ ${isTrade ? '£' + setOutChargeEx + ' ex VAT' : fmtInc(setOutChargeInc)}</span>
+            </div>` : ''}
+            ${setupCostInc > 0 ? `
+            <div class="mileage-line mileage-surcharge">
+              <span>Setup cost</span>
+              <span>+ ${isTrade ? '£' + setupCostEx + ' ex VAT' : fmtInc(setupCostInc)}</span>
             </div>` : ''}
            </div>`
         : `<p class="price-box-note">${isTrade ? fmtEx(tier.installedEx) + ' ex VAT per screw' : fmtInc(tier.installedInc) + ' per screw'} · travel FREE</p>`}
