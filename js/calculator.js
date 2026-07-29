@@ -50,10 +50,9 @@ const PRICING = {
 }
 
 const MILEAGE = [
-  { maxMiles:35,       label:'Within 35 miles', chargeEx:0,   chargeInc:0,   poa:false },
-  { maxMiles:55,       label:'35–55 miles',      chargeEx:75,  chargeInc:90,  poa:false },
-  { maxMiles:75,       label:'55–75 miles',      chargeEx:150, chargeInc:180, poa:false },
-  { maxMiles:Infinity, label:'75+ miles',         chargeEx:0,   chargeInc:0,   poa:true  },
+  { maxMiles:35, label:'Within 35 miles', chargeEx:0,   chargeInc:0,   poa:false },
+  { maxMiles:55, label:'35–55 miles',     chargeEx:75,  chargeInc:90,  poa:false },
+  { maxMiles:75, label:'55–75 miles',     chargeEx:150, chargeInc:180, poa:false },
 ]
 
 const BASE_CONFIGS = {
@@ -89,7 +88,10 @@ function getPricing(qty) {
 }
 
 function getMileageTier(miles) {
-  return MILEAGE.find(t => miles <= t.maxMiles) || MILEAGE[MILEAGE.length - 1]
+  const tier = MILEAGE.find(t => miles <= t.maxMiles)
+  if (tier) return tier
+  const extraBands = Math.ceil((miles - 75) / 10)
+  return { label: '75+ miles', chargeEx: 150 + extraBands * 20, chargeInc: 180 + extraBands * 24, poa: false }
 }
 
 function haversineMiles(lat1, lng1, lat2, lng2) {
@@ -439,12 +441,7 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
     setupCostInc > 0 ? 'inc setup' : ''
   ].filter(Boolean).join(' · ').replace('Supply &amp; Install · ', 'Supply &amp; Install (') + (hasExtras ? ')' : '')
 
-  const installBoxHtml = mileageTier.poa ? `
-    <div class="price-box price-box--install poa-box">
-      <p class="price-box-label">Supply &amp; Install</p>
-      <p class="price-box-amount poa-amount">POA</p>
-      <p class="price-box-note">75+ miles — contact us for a quote including travel</p>
-    </div>` : `
+  const installBoxHtml = `
     <div class="price-box price-box--install">
       <p class="price-box-label">${installLabel}</p>
       <p class="price-box-amount">${fmtInc(installTotalInc)}</p>
