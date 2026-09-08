@@ -68,9 +68,10 @@ const FLANGE = 0.2
 const GD_LAT = 51.392
 const GD_LNG = -0.530
 
-let customerType       = 'domestic'
+let customerType        = 'domestic'
 let selectedScrewLength = '1.25m'
 let selectedBase        = null
+let calcMode            = 'auto'
 
 function calcScrews(width, depth, swid, sdep) {
   if (swid <= 0 || sdep <= 0 || width <= 0.2 || depth <= 0.2) return null
@@ -159,6 +160,32 @@ function selectScrewLength(len) {
   updatePricingTable()
 }
 
+function selectMode(mode) {
+  calcMode = mode
+  const isAuto = mode === 'auto'
+  document.getElementById('standard-inputs').style.display  = isAuto ? '' : 'none'
+  document.getElementById('standard-steps').style.display   = isAuto ? '' : 'none'
+  document.getElementById('bespoke-inputs').style.display   = isAuto ? 'none' : ''
+
+  const autoBtn    = document.getElementById('mode-auto')
+  const bespokeBtn = document.getElementById('mode-bespoke')
+  if (isAuto) {
+    autoBtn.style.borderColor    = 'var(--green-500)'
+    autoBtn.style.background     = '#f0fdf4'
+    autoBtn.style.color          = 'var(--green-700)'
+    bespokeBtn.style.borderColor = '#d1d5db'
+    bespokeBtn.style.background  = '#fff'
+    bespokeBtn.style.color       = '#6b7280'
+  } else {
+    bespokeBtn.style.borderColor = 'var(--green-500)'
+    bespokeBtn.style.background  = '#f0fdf4'
+    bespokeBtn.style.color       = 'var(--green-700)'
+    autoBtn.style.borderColor    = '#d1d5db'
+    autoBtn.style.background     = '#fff'
+    autoBtn.style.color          = '#6b7280'
+  }
+}
+
 function selectBase(key) {
   selectedBase = key
   const cfg = BASE_CONFIGS[key]
@@ -212,22 +239,35 @@ async function handleSubmit() {
   const errorEl = document.getElementById('calc-error')
   errorEl.style.display = 'none'
 
-  const width = parseFloat(document.getElementById('width').value)
-  const depth = parseFloat(document.getElementById('depth').value)
-  const swid  = parseFloat(document.getElementById('spacing-width').value)
-  const sdep  = parseFloat(document.getElementById('spacing-depth').value)
+  let sc = null
+  let width = null, depth = null
 
-  if (!width || !depth || !swid || !sdep || width <= 0 || depth <= 0 || swid <= 0 || sdep <= 0) {
-    errorEl.textContent = 'Please enter valid dimensions and spacing values.'
-    errorEl.style.display = 'block'
-    return
-  }
+  if (calcMode === 'bespoke') {
+    const manualCount = parseInt(document.getElementById('bespoke-screws').value)
+    if (!manualCount || manualCount < 1) {
+      errorEl.textContent = 'Please enter the number of screws.'
+      errorEl.style.display = 'block'
+      return
+    }
+    sc = { total: manualCount, rows: null, cols: null, widthSpan: null, depthSpan: null, bespoke: true }
+  } else {
+    width = parseFloat(document.getElementById('width').value)
+    depth = parseFloat(document.getElementById('depth').value)
+    const swid = parseFloat(document.getElementById('spacing-width').value)
+    const sdep = parseFloat(document.getElementById('spacing-depth').value)
 
-  const sc = calcScrews(width, depth, swid, sdep)
-  if (!sc || sc.total < 1) {
-    errorEl.textContent = 'Could not calculate — check your dimensions.'
-    errorEl.style.display = 'block'
-    return
+    if (!width || !depth || !swid || !sdep || width <= 0 || depth <= 0 || swid <= 0 || sdep <= 0) {
+      errorEl.textContent = 'Please enter valid dimensions and spacing values.'
+      errorEl.style.display = 'block'
+      return
+    }
+
+    sc = calcScrews(width, depth, swid, sdep)
+    if (!sc || sc.total < 1) {
+      errorEl.textContent = 'Could not calculate — check your dimensions.'
+      errorEl.style.display = 'block'
+      return
+    }
   }
 
   let contactName, contactEmail, contactPhone = '', bizAddress = '', bizContactName = ''
@@ -260,7 +300,7 @@ async function handleSubmit() {
   const addressInput = document.getElementById('postcode').value.trim()
 
   const tier     = getPricing(sc.total)
-  const baseLabel = selectedBase ? BASE_CONFIGS[selectedBase].label : 'Custom spacing'
+  const baseLabel = sc.bespoke ? 'Bespoke layout' : (selectedBase ? BASE_CONFIGS[selectedBase].label : 'Custom spacing')
 
   let miles = null
   let mileageTier = MILEAGE[0]
@@ -305,9 +345,9 @@ async function handleSubmit() {
     `Customer type: ${isTrade ? 'Trade' : 'Domestic'}`,
     isTrade && contactName ? `Company: ${contactName}` : null,
     `Screw length: ${selectedScrewLength}`,
-    `Dimensions: ${width}m × ${depth}m`,
+    sc.bespoke ? null : `Dimensions: ${width}m × ${depth}m`,
     `Base type: ${baseLabel}`,
-    `Screws: ${sc.total} (${sc.rows} rows × ${sc.cols} wide)`,
+    sc.bespoke ? `Screws: ${sc.total} (bespoke layout)` : `Screws: ${sc.total} (${sc.rows} rows × ${sc.cols} wide)`,
     `Supply only: ${fmtInc(supplyTotalInc)}${isTrade ? ` inc / ${fmtEx(supplyTotalEx)} ex VAT` : ' inc VAT'}`,
     `Install total: ${installTotalInc ? fmtInc(installTotalInc) + (isTrade ? ` inc / ${fmtEx(installTotalEx)} ex VAT` : ' inc VAT') : 'POA'}`,
     `Mileage: ${mileageTier.label}${miles !== null ? ` (~${miles} miles)` : ''} — ${mileageChargeLabel}`,
@@ -322,7 +362,9 @@ async function handleSubmit() {
 
   try {
     const formBody = new FormData()
-    formBody.append('_subject', `${isTrade ? 'TRADE' : 'Calculator'} lead: ${contactName} — ${width}m × ${depth}m (${selectedScrewLength} screws)`)
+    formBody.append('_subject', sc.bespoke
+      ? `${isTrade ? 'TRADE' : 'Calculator'} lead: ${contactName} — ${sc.total} screws bespoke (${selectedScrewLength})`
+      : `${isTrade ? 'TRADE' : 'Calculator'} lead: ${contactName} — ${width}m × ${depth}m (${selectedScrewLength} screws)`)
     if (isTrade) formBody.append('Name', bizContactName)
     formBody.append(isTrade ? 'Business name' : 'Name',  contactName)
     formBody.append(isTrade ? 'Business email' : 'Email', contactEmail)
@@ -330,9 +372,9 @@ async function handleSubmit() {
     if (bizAddress) formBody.append('Business address', bizAddress)
     formBody.append('Customer type', customerType)
     formBody.append('Screw length',  selectedScrewLength)
-    formBody.append('Dimensions',    `${width}m × ${depth}m`)
+    if (!sc.bespoke) formBody.append('Dimensions', `${width}m × ${depth}m`)
     formBody.append('Base type',     baseLabel)
-    formBody.append('Screws',        `${sc.total} (${sc.rows} rows × ${sc.cols} wide)`)
+    formBody.append('Screws',        sc.bespoke ? `${sc.total} (bespoke)` : `${sc.total} (${sc.rows} rows × ${sc.cols} wide)`)
     formBody.append('Supply only',   fmtInc(supplyTotalInc) + (isTrade ? ` inc / ${fmtEx(supplyTotalEx)} ex VAT` : ' inc VAT'))
     formBody.append('Mileage',       `${mileageTier.label} — ${mileageChargeLabel}`)
     formBody.append('Install total', installTotalInc ? fmtInc(installTotalInc) + (isTrade ? ` inc / ${fmtEx(installTotalEx)} ex VAT` : ' inc VAT') : 'POA')
@@ -363,10 +405,12 @@ async function handleSubmit() {
         email_data: {
           is_trade:           isTrade,
           screw_count:        sc.total,
-          screw_rows:         sc.rows,
-          screw_cols:         sc.cols,
+          screw_rows:         sc.bespoke ? null : sc.rows,
+          screw_cols:         sc.bespoke ? null : sc.cols,
           screw_length:       selectedScrewLength,
-          width, depth,
+          bespoke:            sc.bespoke || false,
+          width:              sc.bespoke ? null : width,
+          depth:              sc.bespoke ? null : depth,
           base_label:         baseLabel,
           supply_inc:         supplyTotalInc,
           supply_ex:          supplyTotalEx,
@@ -490,7 +534,10 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
         <div>
           <p class="result-label">${displayName} — ${isTrade ? 'trade estimate' : 'your estimate'}</p>
           <p class="result-big-num">${sc.total}</p>
-          <p class="result-sub">${sc.rows} rows × ${sc.cols} wide · ${width}m × ${depth}m · ${baseLabel} · ${selectedScrewLength} screws</p>
+          <p class="result-sub">${sc.bespoke
+            ? `Bespoke layout · ${selectedScrewLength} screws`
+            : `${sc.rows} rows × ${sc.cols} wide · ${width}m × ${depth}m · ${baseLabel} · ${selectedScrewLength} screws`
+          }</p>
         </div>
         <span class="tier-badge ${tierColor}">${perScrewBadge}</span>
       </div>
@@ -505,10 +552,11 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
       </div>
 
       <div class="result-meta">
+        ${!sc.bespoke ? `
         <div class="result-meta-row">
           <svg class="res-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
           <span>Clear span (W): <strong>${sc.widthSpan.toFixed(3)}m</strong> · Clear span (D): <strong>${sc.depthSpan.toFixed(3)}m</strong></span>
-        </div>
+        </div>` : ''}
         ${mileageRow}
       </div>
 
@@ -537,10 +585,11 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
 function resetCalc() {
   selectedBase = null
   selectedScrewLength = '1.25m'
+  selectMode('auto')
   document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
   document.querySelectorAll('[data-screw]').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
   document.getElementById('spacing-hint').style.display = 'none'
-  ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode',
+  ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode', 'bespoke-screws',
     'cust-name', 'cust-email', 'cust-phone',
     'biz-contact-name', 'biz-name', 'biz-email', 'biz-phone', 'biz-address'].forEach(id => {
     const el = document.getElementById(id)
