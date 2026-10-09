@@ -10,7 +10,7 @@ const PRICING = {
       { minQty:30, maxQty:39,       supplyInc:28, installedInc:76 },
       { minQty:40, maxQty:Infinity, supplyInc:27, installedInc:70 },
     ],
-    '1.25m': [
+    '1.2m': [
       { minQty:1,  maxQty:19,       supplyInc:33, installedInc:90 },
       { minQty:20, maxQty:29,       supplyInc:32, installedInc:84 },
       { minQty:30, maxQty:39,       supplyInc:31, installedInc:78 },
@@ -34,7 +34,7 @@ const PRICING = {
       { minQty:1,  maxQty:19,       supplyInc:29, supplyEx:24.2, installedInc:76,  installedEx:63.3 },
       { minQty:20, maxQty:Infinity, supplyInc:27, supplyEx:22.5, installedInc:70,  installedEx:58.3 },
     ],
-    '1.25m': [
+    '1.2m': [
       { minQty:1,  maxQty:19,       supplyInc:32, supplyEx:26.7, installedInc:78,  installedEx:65.0 },
       { minQty:20, maxQty:Infinity, supplyInc:30, supplyEx:25.0, installedInc:72,  installedEx:60.0 },
     ],

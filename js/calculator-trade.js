@@ -6,7 +6,7 @@ const PRICING = {
     { minQty: 1,  maxQty: 19,  supplyInc: 32, supplyEx: 26.7, installedInc: 76, installedEx: 63.3 },
     { minQty: 20, maxQty: Infinity, supplyInc: 30, supplyEx: 25.0, installedInc: 70, installedEx: 58.3 },
   ],
-  '1.25m': [
+  '1.2m': [
     { minQty: 1,  maxQty: 19,  supplyInc: 35, supplyEx: 29.2, installedInc: 78, installedEx: 65.0 },
     { minQty: 20, maxQty: Infinity, supplyInc: 33, supplyEx: 27.5, installedInc: 72, installedEx: 60.0 },
   ],
