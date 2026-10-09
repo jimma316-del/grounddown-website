@@ -38,7 +38,7 @@ const INSET  = 0.1
 const GD_LAT = 51.392
 const GD_LNG = -0.530
 
-let selectedScrewLength = '1.25m'
+let selectedScrewLength = '1m'
 let selectedBase = null
 
 function calcScrews(width, depth, swid, sdep) {
@@ -301,9 +301,9 @@ function renderResult({ sc, tier, supplyTotalInc, supplyTotalEx, installBaseInc,
 
 function resetCalc() {
   selectedBase = null
-  selectedScrewLength = '1.25m'
+  selectedScrewLength = '1m'
   document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
-  document.querySelectorAll('[data-screw]').forEach(b => b.classList.toggle('active', b.dataset.screw === '1.25m'))
+  document.querySelectorAll('[data-screw]').forEach(b => b.classList.toggle('active', b.dataset.screw === '1m'))
   document.getElementById('spacing-hint').style.display = 'none'
   ;['width', 'depth', 'spacing-width', 'spacing-depth', 'postcode', 'biz-name', 'biz-email', 'biz-address'].forEach(id => {
     document.getElementById(id).value = ''
