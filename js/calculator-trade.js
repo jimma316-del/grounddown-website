@@ -56,7 +56,11 @@ function getPricing(qty) {
 }
 
 function getMileageTier(miles) {
-  return MILEAGE.find(t => miles <= t.maxMiles) || MILEAGE[MILEAGE.length - 1]
+  if (miles <= 35) return MILEAGE[0]
+  if (miles <= 55) return MILEAGE[1]
+  if (miles <= 75) return MILEAGE[2]
+  const extraBands = Math.ceil((miles - 75) / 10)
+  return { maxMiles: Infinity, label: '75+ miles', chargeEx: 150 + extraBands * 20, chargeInc: 180 + extraBands * 24, poa: false }
 }
 
 function haversineMiles(lat1, lng1, lat2, lng2) {
