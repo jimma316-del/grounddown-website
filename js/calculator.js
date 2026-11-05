@@ -75,8 +75,8 @@ let calcMode            = 'auto'
 
 function calcScrews(width, depth, swid, sdep) {
   if (swid <= 0 || sdep <= 0 || width <= 0.2 || depth <= 0.2) return null
-  const cols = Math.ceil((width - 2 * INSET) / swid) + 1
-  const rows = Math.ceil((depth - 2 * INSET) / sdep) + 1
+  const cols = Math.ceil((width - 2 * INSET) / (swid + FLANGE)) + 1
+  const rows = Math.ceil((depth - 2 * INSET) / (sdep + FLANGE)) + 1
   // Clear span = total width minus all flange diameters, divided by gaps between screws
   const widthSpan = cols > 1 ? (width - cols * FLANGE) / (cols - 1) : 0
   const depthSpan = rows > 1 ? (depth - rows * FLANGE) / (rows - 1) : 0
