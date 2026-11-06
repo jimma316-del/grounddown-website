@@ -56,11 +56,11 @@ const MILEAGE = [
 ]
 
 const BASE_CONFIGS = {
-  sips:   { label:'SIPs Base',             widthSpacing:1.22, depthSpacing:1.5 },
-  '4x2':  { label:'4"×2" Base',           widthSpacing:1.2,  depthSpacing:1.2 },
-  '5x2':  { label:'5"×2" Base',           widthSpacing:1.5,  depthSpacing:1.5 },
-  '6x2':  { label:'6"×2" Base',           widthSpacing:1.8,  depthSpacing:1.8 },
-  unsure: { label:'Standard (1.2m × 1.2m)', widthSpacing:1.2, depthSpacing:1.2 },
+  sips:   { label:'SIPs Base',              widthSpacing:1.22, depthSpacing:1.5, clearSpan:false },
+  '4x2':  { label:'4"×2" Base',            widthSpacing:1.2,  depthSpacing:1.2, clearSpan:true  },
+  '5x2':  { label:'5"×2" Base',            widthSpacing:1.5,  depthSpacing:1.5, clearSpan:true  },
+  '6x2':  { label:'6"×2" Base',            widthSpacing:1.8,  depthSpacing:1.8, clearSpan:true  },
+  unsure: { label:'Standard (1.2m × 1.2m)', widthSpacing:1.2, depthSpacing:1.2, clearSpan:true  },
 }
 
 const INSET  = 0.1
@@ -70,16 +70,20 @@ const GD_LNG = -0.530
 
 let customerType        = 'domestic'
 let selectedScrewLength = '1m'
-let selectedBase        = null
+let selectedBase          = null
+let selectedBaseClearSpan = true
 let calcMode            = 'auto'
 
-function calcScrews(width, depth, swid, sdep) {
+function calcScrews(width, depth, swid, sdep, clearSpan = true) {
   if (swid <= 0 || sdep <= 0 || width <= 0.2 || depth <= 0.2) return null
   const ew = width - 2 * INSET
   const ed = depth - 2 * INSET
-  // Try both orientations of the base and use whichever needs fewer screws
-  const cols1 = Math.ceil(ew / swid) + 1, rows1 = Math.ceil(ed / sdep) + 1
-  const cols2 = Math.ceil(ew / sdep) + 1, rows2 = Math.ceil(ed / swid) + 1
+  // For timber bases, spacing = max clear span (flange-to-flange); add one flange to get c-to-c.
+  // For SIPs, spacing is already centre-to-centre (panel width), so use as-is.
+  const eff_w = clearSpan ? swid + FLANGE : swid
+  const eff_d = clearSpan ? sdep + FLANGE : sdep
+  const cols1 = Math.ceil(ew / eff_w) + 1, rows1 = Math.ceil(ed / eff_d) + 1
+  const cols2 = Math.ceil(ew / eff_d) + 1, rows2 = Math.ceil(ed / eff_w) + 1
   const [cols, rows] = cols1 * rows1 <= cols2 * rows2 ? [cols1, rows1] : [cols2, rows2]
   const widthSpan = cols > 1 ? (width - cols * FLANGE) / (cols - 1) : 0
   const depthSpan = rows > 1 ? (depth - rows * FLANGE) / (rows - 1) : 0
@@ -192,6 +196,7 @@ function selectMode(mode) {
 function selectBase(key) {
   selectedBase = key
   const cfg = BASE_CONFIGS[key]
+  selectedBaseClearSpan = cfg.clearSpan ?? true
   document.getElementById('spacing-width').value = cfg.widthSpacing
   document.getElementById('spacing-depth').value = cfg.depthSpacing
   document.querySelectorAll('.base-btn').forEach(btn =>
@@ -265,7 +270,7 @@ async function handleSubmit() {
       return
     }
 
-    sc = calcScrews(width, depth, swid, sdep)
+    sc = calcScrews(width, depth, swid, sdep, selectedBaseClearSpan)
     if (!sc || sc.total < 1) {
       errorEl.textContent = 'Could not calculate — check your dimensions.'
       errorEl.style.display = 'block'
@@ -623,11 +628,13 @@ document.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('spacing-width').addEventListener('input', () => {
     selectedBase = null
+    selectedBaseClearSpan = true
     document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
     document.getElementById('spacing-hint').style.display = 'none'
   })
   document.getElementById('spacing-depth').addEventListener('input', () => {
     selectedBase = null
+    selectedBaseClearSpan = true
     document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
     document.getElementById('spacing-hint').style.display = 'none'
   })
