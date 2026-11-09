@@ -56,11 +56,11 @@ const MILEAGE = [
 ]
 
 const BASE_CONFIGS = {
-  sips:   { label:'SIPs Base',              widthSpacing:1.22, depthSpacing:1.5, clearSpan:false },
-  '4x2':  { label:'4"×2" Base',            widthSpacing:1.2,  depthSpacing:1.2, clearSpan:true  },
-  '5x2':  { label:'5"×2" Base',            widthSpacing:1.2,  depthSpacing:1.5, clearSpan:true  },
-  '6x2':  { label:'6"×2" Base',            widthSpacing:1.2,  depthSpacing:1.8, clearSpan:true  },
-  unsure: { label:'Standard (1.2m × 1.2m)', widthSpacing:1.2, depthSpacing:1.2, clearSpan:true  },
+  sips:   { label:'SIPs Base',              widthSpacing:1.22, depthSpacing:1.5, clearSpanW:false, clearSpanD:false },
+  '4x2':  { label:'4"×2" Base',            widthSpacing:1.2,  depthSpacing:1.2, clearSpanW:false, clearSpanD:true  },
+  '5x2':  { label:'5"×2" Base',            widthSpacing:1.2,  depthSpacing:1.5, clearSpanW:false, clearSpanD:true  },
+  '6x2':  { label:'6"×2" Base',            widthSpacing:1.2,  depthSpacing:1.8, clearSpanW:false, clearSpanD:true  },
+  unsure: { label:'Standard (1.2m × 1.2m)', widthSpacing:1.2, depthSpacing:1.2, clearSpanW:false, clearSpanD:true  },
 }
 
 const INSET  = 0.1
@@ -70,18 +70,19 @@ const GD_LNG = -0.530
 
 let customerType        = 'domestic'
 let selectedScrewLength = '1m'
-let selectedBase          = null
-let selectedBaseClearSpan = true
+let selectedBase    = null
+let selectedBaseCSW = false
+let selectedBaseCSD = false
 let calcMode            = 'auto'
 
-function calcScrews(width, depth, swid, sdep, clearSpan = true) {
+function calcScrews(width, depth, swid, sdep, clearSpanW = false, clearSpanD = false) {
   if (swid <= 0 || sdep <= 0 || width <= 0.2 || depth <= 0.2) return null
   const ew = width - 2 * INSET
   const ed = depth - 2 * INSET
-  // For timber bases, spacing = max clear span (flange-to-flange); add one flange to get c-to-c.
-  // For SIPs, spacing is already centre-to-centre (panel width), so use as-is.
-  const eff_w = clearSpan ? swid + FLANGE : swid
-  const eff_d = clearSpan ? sdep + FLANGE : sdep
+  // Width: c-to-c for SIPs panel width and timber cross-members (clearSpanW=false).
+  // Depth: clear span for timber joists (clearSpanD=true), c-to-c for SIPs (false).
+  const eff_w = clearSpanW ? swid + FLANGE : swid
+  const eff_d = clearSpanD ? sdep + FLANGE : sdep
   const cols1 = Math.ceil(ew / eff_w) + 1, rows1 = Math.ceil(ed / eff_d) + 1
   const cols2 = Math.ceil(ew / eff_d) + 1, rows2 = Math.ceil(ed / eff_w) + 1
   const [cols, rows] = cols1 * rows1 <= cols2 * rows2 ? [cols1, rows1] : [cols2, rows2]
@@ -196,7 +197,8 @@ function selectMode(mode) {
 function selectBase(key) {
   selectedBase = key
   const cfg = BASE_CONFIGS[key]
-  selectedBaseClearSpan = cfg.clearSpan ?? true
+  selectedBaseCSW = cfg.clearSpanW ?? false
+  selectedBaseCSD = cfg.clearSpanD ?? false
   document.getElementById('spacing-width').value = cfg.widthSpacing
   document.getElementById('spacing-depth').value = cfg.depthSpacing
   document.querySelectorAll('.base-btn').forEach(btn =>
@@ -270,7 +272,7 @@ async function handleSubmit() {
       return
     }
 
-    sc = calcScrews(width, depth, swid, sdep, selectedBaseClearSpan)
+    sc = calcScrews(width, depth, swid, sdep, selectedBaseCSW, selectedBaseCSD)
     if (!sc || sc.total < 1) {
       errorEl.textContent = 'Could not calculate — check your dimensions.'
       errorEl.style.display = 'block'
@@ -628,13 +630,15 @@ document.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('spacing-width').addEventListener('input', () => {
     selectedBase = null
-    selectedBaseClearSpan = true
+    selectedBaseCSW = false
+    selectedBaseCSD = false
     document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
     document.getElementById('spacing-hint').style.display = 'none'
   })
   document.getElementById('spacing-depth').addEventListener('input', () => {
     selectedBase = null
-    selectedBaseClearSpan = true
+    selectedBaseCSW = false
+    selectedBaseCSD = false
     document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'))
     document.getElementById('spacing-hint').style.display = 'none'
   })
